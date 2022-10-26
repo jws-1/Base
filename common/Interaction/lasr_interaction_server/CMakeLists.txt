@@ -54,6 +54,7 @@ add_service_files(
    FILES
    SpeechInteraction.srv
    TextInteraction.srv
+   Speech.srv
 )
 
 ## Generate actions in the 'action' folder

@@ -1,5 +1,5 @@
-std_msgs/String task
-std_msgs/String action
+string task
+string action
 ---
-std_msgs/String result
-std_msgs/Bool success
+string result
+bool success

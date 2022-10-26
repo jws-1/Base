@@ -6,8 +6,8 @@ from std_msgs.msg import String
 from google.api_core.exceptions import DeadlineExceeded
 
 class ReceptionistAction(BaseAction):
-    def __init__(self, project_id, df_lang_id="en"):
-        super(ReceptionistAction, self).__init__(project_id, df_lang_id="en")
+    def __init__(self, project_id, df_lang_id="en", device=None):
+        super(ReceptionistAction, self).__init__(project_id, df_lang_id=df_lang_id, device=device)
 
         self.name = None
         self.name_confirmed = None
