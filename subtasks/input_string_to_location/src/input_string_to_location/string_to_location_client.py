@@ -23,13 +23,14 @@ if __name__ == '__main__':
     try:
         while not rospy.is_shutdown():
             location = speech_interaction("go_to_location", "ask_location").result
+            print(location)
             if not location:
                 speak("I didn't get that. Please can you repeat?")
             else:
                 speak(f"Do you want me to go to {location}?")
-                correct = speech_interaction("go_to_location", "confirm").result == "yes"
+                correct = speech_interaction("go_to_location", "confirm_location").result == "yes"
                 if correct:
-                    print("correct")
-                    # client(location)
+                    speak("correct")
+                    client(location)
     except rospy.ROSInterruptException:
         pass
