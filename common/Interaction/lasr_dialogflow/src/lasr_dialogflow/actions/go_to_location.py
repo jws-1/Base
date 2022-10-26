@@ -31,13 +31,13 @@ class GoToLocationAction(BaseAction):
             return self.handle_response(self.listen_in_context("ConfirmLocation"), "ConfirmLocation")
 
     def handle_response(self, response, context):
-        if not response:
+        if not response or not response.query_text:
             print(response)
-            return None
+            return ""
         try:
             if context == "GetLocation":
                 return response.query_result.parameters["location"]
             elif context == "ConfirmLocation":
                 return response.query_result.parameters["yesno"]
         except ValueError:
-            return None
+            return ""

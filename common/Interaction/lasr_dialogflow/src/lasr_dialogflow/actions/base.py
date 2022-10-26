@@ -38,6 +38,8 @@ class BaseAction():
             if response.recognition_result.message_type == dialogflow.types.StreamingRecognitionResult.MessageType.END_OF_SINGLE_UTTERANCE:
                 print("end of utterance")
                 self.stop()
+            if not response.query_text:
+                print("No audio request.")
         return response
 
     def text_in_context(self, text, context=None):
