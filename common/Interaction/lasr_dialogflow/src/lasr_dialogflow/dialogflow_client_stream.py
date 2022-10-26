@@ -31,17 +31,18 @@ class DialogflowClientStream():
         )
         
         self.stop_requested = False
-        # self.microphone_stream = None
 
     def detect_intent(self, query_params):
 
+        self.microphone_stream = self.audio_interface.open(rate=self.sample_rate, channels=1, input_device_index=self.input_device, format=pyaudio.paInt16, input=True, frames_per_buffer=CHUNK_SIZE)
+
         self.stop_requested = False
 
-        self.microphone_stream = self.audio_interface.open(rate=self.sample_rate, channels=1, input_device_index=self.input_device, format=pyaudio.paInt16, input=True, frames_per_buffer=CHUNK_SIZE)
         print("listening")
+
         def request_generator(self):
             query_input = dialogflow.QueryInput(audio_config=self.audio_config)
-
+            print(query_params)
             # The first request contains the configuration.
             yield dialogflow.StreamingDetectIntentRequest(
                 session=self.session_path, query_input=query_input, single_utterance=True, query_params=query_params
@@ -90,25 +91,39 @@ class DialogflowClientStream():
     #         yield dialogflow.types.session_pb2.StreamingDetectIntentRequest(input_audio=chunk)
         
 
-    # def text_request(self, text, query_params=None):
-    #     text_input = dialogflow.types.session_pb2.TextInput(text=text, language_code="en-GB")
-    #     query_input = dialogflow.types.session_pb2.QueryInput(text=text_input)
-    #     response = self.session_client.detect_intent(session=self.session_path, query_input=query_input, query_params=query_params)
-
-    #     return response
+    def text_request(self, text, query_params=None):
+        text_input = dialogflow.types.TextInput(text=text, language_code="en-GB")
+        query_input = dialogflow.types.QueryInput(text=text_input)
+        # help(self.session_client.detect_intent)
+        request = dialogflow.DetectIntentRequest(
+            session=self.session_path,
+            query_input=query_input,
+            query_params=query_params
+        )
+        response = self.session_client.detect_intent(request=request)
+        print(response)
+        return response
 
     def audio_generator(self):
+        if self.microphone_stream.is_stopped():
+            self.microphone_stream.start_stream()
         while not self.stop_requested:
             chunk = self.microphone_stream.read(CHUNK_SIZE)
-            if chunk:
+            if chunk is not None:
                 yield chunk
 
-    def stop(self):
-        self.stop_requested = True
-        if self.microphone_stream:
-            self.microphone_stream.stop_stream()
-            self.microphone_stream.close()
-        print("Stopped listening")
+    # def __del__(self):
+    #     self.stop()
+    #     self.audio_interface.terminate()
+
+
+    # def stop(self):
+    #     self.stop_requested = True
+    #     if self.microphone_stream is not None:
+    #         self.microphone_stream.stop_stream()
+    #         # self.microphone_stream.close()
+    #         self.audio_interface.terminate()
+    #     print("Stopped listening")
     
     # def __del__(self):
     #     self.stop()

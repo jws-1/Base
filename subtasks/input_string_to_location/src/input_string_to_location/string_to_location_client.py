@@ -3,6 +3,7 @@
 import rospy
 from input_string_to_location.srv import StringToLocation, StringToLocationRequest
 from std_msgs.msg import String
+from lasr_interaction_server.srv import SpeechInteraction, Speech
 
 def client(location: String):
     rospy.wait_for_service('/string_to_location')
@@ -17,9 +18,18 @@ def client(location: String):
         
 if __name__ == '__main__':
     rospy.init_node("string_to_location_client", anonymous=True)
+    speech_interaction = rospy.ServiceProxy("/lasr_interaction_server/speech_interaction", SpeechInteraction)
+    speak = rospy.ServiceProxy("/lasr_interaction_server/text_interaction", Speech)
     try:
         while not rospy.is_shutdown():
-            input = rospy.wait_for_message('/lasr_web_server/text_input', String)
-            client(input)
+            location = speech_interaction("go_to_location", "ask_location").result
+            if not location:
+                speak("I didn't get that. Please can you repeat?")
+            else:
+                speak(f"Do you want me to go to {location}?")
+                correct = speech_interaction("go_to_location", "confirm").result == "yes"
+                if correct:
+                    print("correct")
+                    # client(location)
     except rospy.ROSInterruptException:
         pass

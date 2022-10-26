@@ -9,5 +9,5 @@ speech = rospy.ServiceProxy("/lasr_interaction_server/speech_interaction", Speec
 print(speech("go_to_location", "ask_location"))
 
 # text = rospy.ServiceProxy("/lasr_interaction_server/text_interaction", TextInteraction)
-# print(text("go_to_location", "ask_location", "Go to 6.02."))
+# print(text("go_to_location", "confirm_location", "Yes"))
 

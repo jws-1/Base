@@ -27,15 +27,17 @@ class BaseAction():
     def stop(self):
         self.streaming_client.stop()
     
-    def listen_in_context(self, context=None, attempts=3):
+    def listen_in_context(self, context=None):
         query_params = None
         response = None
         if context:
             query_params = dialogflow.types.QueryParameters(contexts=[self.get_context(context)])
+            print(query_params)
         for response in self.streaming_client.detect_intent(query_params):
+            print(response)
             if response.recognition_result.message_type == dialogflow.types.StreamingRecognitionResult.MessageType.END_OF_SINGLE_UTTERANCE:
                 print("end of utterance")
-                self.stop()
+                # self.stop()
         return response
 
     def text_in_context(self, text, context=None):

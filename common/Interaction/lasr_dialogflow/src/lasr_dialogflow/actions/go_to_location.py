@@ -24,9 +24,9 @@ class GoToLocationAction(BaseAction):
             return self.handle_response(self.listen_in_context("GetLocation"), "GetLocation")
 
     def confirm_location(self, use_mic=False, text=None):
+        print(use_mic, text)
         if not use_mic and text:
             return self.handle_response(self.text_in_context(text, context="ConfirmLocation"), "ConfirmLocation")
-                
         elif use_mic:
             return self.handle_response(self.listen_in_context("ConfirmLocation"), "ConfirmLocation")
 
