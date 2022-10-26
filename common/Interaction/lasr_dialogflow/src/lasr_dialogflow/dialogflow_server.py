@@ -8,6 +8,9 @@ from std_msgs.msg import String
 
 import pyaudio
 
+
+CHUNK_SIZE = 4096
+
 class DialogflowServer():
 
     def __init__(self):
@@ -23,18 +26,19 @@ class DialogflowServer():
             }
         }
 
-        pa = pyaudio.PyAudio()
+        self.audio_interface = pyaudio.PyAudio()
 
-        info = pa.get_host_api_info_by_index(0)
+        info = self.audio_interface.get_host_api_info_by_index(0)
         for i in range(info['deviceCount']):
-                if pa.get_device_info_by_host_api_device_index(0, i)['maxInputChannels'] > 0:
-                    print("Input Device id ", i, " - ", pa.get_device_info_by_host_api_device_index(0, i)['name'])
+                if self.audio_interface.get_device_info_by_host_api_device_index(0, i)['maxInputChannels'] > 0:
+                    print("Input Device id ", i, " - ", self.audio_interface.get_device_info_by_host_api_device_index(0, i)['name'])
 
         print("Please enter a device index to use: ", end='')
         self.device = int(input())
+        self.sample_rate = int(self.audio_interface.get_device_info_by_index(self.device)["defaultSampleRate"])
+        print(f"Using device index {self.device}, {self.audio_interface.get_device_info_by_host_api_device_index(0, self.device)['name']}, sample rate is {self.sample_rate}, frames per buffer is {CHUNK_SIZE}")
 
-        print(f"Using device index {self.device}, {pa.get_device_info_by_host_api_device_index(0, self.device)['name']}")
-
+        self.microphone_stream = self.audio_interface.open(rate=self.sample_rate, channels=1, input_device_index=self.device, format=pyaudio.paInt16, input=True, frames_per_buffer=CHUNK_SIZE, start=False)
         self.audio_srv = rospy.Service("/dialogflow_server/process_audio", DialogflowAudio, self.process_audio)
         self.text_srv = rospy.Service("/dialogflow_server/process_text", DialogflowText, self.process_text)
 
@@ -43,7 +47,7 @@ class DialogflowServer():
         response = DialogflowAudioResponse()
 
         project_id = self.config[req.task]["project_id"]
-        task = self.config[req.task]["cls"](project_id, device=self.device)
+        task = self.config[req.task]["cls"](project_id, self.microphone_stream, self.sample_rate, CHUNK_SIZE)
         result = task.actions[req.action](use_mic=True)
 
         if result:
@@ -57,7 +61,7 @@ class DialogflowServer():
         response = DialogflowTextResponse()
 
         project_id = self.config[req.task]["project_id"]
-        task = self.config[req.task]["cls"](project_id)
+        task = self.config[req.task]["cls"](project_id, self.microphone_stream, self.sample_rate, CHUNK_SIZE)
         result = task.actions[req.action](use_mic=False, text=req.query_text)
 
         if result:

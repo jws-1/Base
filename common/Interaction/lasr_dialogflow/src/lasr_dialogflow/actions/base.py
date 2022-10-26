@@ -7,12 +7,10 @@ import rospy
 
 class BaseAction():
 
-    def __init__(self, project_id, df_lang_id="en", device=None):
+    def __init__(self, project_id, microphone_stream, rate, chunk_sz, df_lang_id="en"):
 
         self.project_id = project_id
         self.df_lang_id = df_lang_id
-        self.attempts = 0
-        self.max_attempts = 3
         self.streaming_client = None
 
         self.session_id = uuid.uuid4()
@@ -20,8 +18,10 @@ class BaseAction():
         self.streaming_client = DialogflowClientStream(
             self.project_id,
             self.session_id,
+            microphone_stream,
+            rate,
+            chunk_sz,
             language_code=self.df_lang_id,
-            input_device=device
         )
     
     def stop(self):
@@ -37,7 +37,7 @@ class BaseAction():
             print(response)
             if response.recognition_result.message_type == dialogflow.types.StreamingRecognitionResult.MessageType.END_OF_SINGLE_UTTERANCE:
                 print("end of utterance")
-                # self.stop()
+                self.stop()
         return response
 
     def text_in_context(self, text, context=None):

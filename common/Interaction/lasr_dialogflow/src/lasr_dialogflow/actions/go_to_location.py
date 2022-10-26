@@ -8,8 +8,8 @@ from google.api_core.exceptions import DeadlineExceeded
 
 class GoToLocationAction(BaseAction):
     
-    def __init__(self, project_id, df_lang_id="en", device=None):
-        super(GoToLocationAction, self).__init__(project_id, df_lang_id=df_lang_id, device=device)
+    def __init__(self, project_id, microphone_stream, rate, chunk_sz, df_lang_id="en"):
+        super(GoToLocationAction, self).__init__(project_id, microphone_stream, rate, chunk_sz, df_lang_id=df_lang_id)
 
         self.actions = {
             "ask_location" : self.ask_location,
