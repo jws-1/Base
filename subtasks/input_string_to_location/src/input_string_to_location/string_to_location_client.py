@@ -25,12 +25,12 @@ if __name__ == '__main__':
             location = speech_interaction("go_to_location", "ask_location").result
             print(location)
             if not location:
-                speak("I didn't get that. Please can you repeat?")
+                speak("I didn't get that. Please can you repeat?", True)
             else:
-                speak(f"Do you want me to go to {location}?")
+                speak(f"Do you want me to go to {location}?", True)
                 correct = speech_interaction("go_to_location", "confirm_location").result == "yes"
                 if correct:
-                    speak("correct")
+                    speak(f"Going to {location}")
                     client(location)
     except rospy.ROSInterruptException:
         pass
