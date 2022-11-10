@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import rospy
+
+
+class MapCreationClient:
+    def __init__(self):
+        rospy.wait_for_service('own_location_server')
+        rospy.wait_for_service('room_name_server')
+        self.location_client = rospy.ServiceProxy('own_location_server', own_location_server)
+        self.location_to_rooom = rospy.ServiceProxy('room_name_server', room_name_server) 
+        rospy.wait_for_service('map_creation')
+        self._client = rospy.ServiceProxy('map_creation', MapCreation)
+
+    def call(self):
+        #get current position, and with that get the room name
+        
+        location = self.location_client(location)
+        room_name = self.location_to_room(location)
+        
+        req = MapCreationRequest()
+        req.location = location
+        req.room_name = room_name
+
+        resp = self._client(req)
+        return resp.is_updated
+
+if __name__ == '__main__':
+    rospy.init_node("map_creation_clinet", anonymous=True)
+    try:
+        while not rospy.is_shutdown():
+            client = MapCreationClient()
+            client.call()
+    except rospy.ROSInterruptException:
+        pass

@@ -1,2 +1,4 @@
+std_msgs/String roomname
+geometry_msg/msg/Point location
 ---
 std_msgs/Bool update_successful
