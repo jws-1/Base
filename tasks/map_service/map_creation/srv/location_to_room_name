@@ -1,0 +1,4 @@
+
+geometry_msgs/msg/Point curr_location
+---
+std_msgs/String roomname
