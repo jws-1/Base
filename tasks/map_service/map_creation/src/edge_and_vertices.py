@@ -12,10 +12,10 @@ class Vertice:
         if next not in self.next:
             self.next.append(next)
     
-    def not(other):
+    def isNot(self, other):
         return not self.name == other.name
 
-    def notName(name):
+    def notName(self, name):
         return not self.name == name
     
     def _compress(self):
@@ -33,8 +33,8 @@ class Graph:
     def hasVertice(self, vertice):
         for v in self.adjLists:
             if vertice.name == v.name:
-                return true
-        return false
+                return True
+        return False
 
     
     def addVertice(self, vertice, previous_vertice = None):

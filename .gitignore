@@ -1,3 +1,7 @@
+# large folders
+common/custom_worlds
+common/Perception/lasr_object_detection_yolo/models/coco
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
