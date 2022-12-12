@@ -15,6 +15,7 @@ from std_msgs.msg import String
 
 class SimpleMeetGreet:
     def __init__(self):
+        self.continuous_perception_sub = None
         self.controllers = Controllers()
         #
         # if rospy.get_published_topics(namespace='/xtion'):
@@ -24,7 +25,6 @@ class SimpleMeetGreet:
         #     print('in usb')
         #     self.topic = '/usb_cam/image_raw'
 
-        # self.voice = Voice()
         self.map_points = ['/point1', '/point2']  # pos on map
 
     # def find_person(self):

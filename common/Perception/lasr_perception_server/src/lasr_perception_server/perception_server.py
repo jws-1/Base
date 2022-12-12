@@ -3,7 +3,7 @@ import rospy
 
 from lasr_object_detection_yolo.srv import YoloDetection, YoloDetectionResponse
 
-from lasr_perception_server.srv import DetectImage, DetectImages, DetectImageResponse, DetectImagesResponse
+from lasr_perception_server.srv import DetectImage, OneDetectionImage, DetectImageResponse, OneDetectionImageResponse
 from face_detection.srv import FaceDetection, FaceDetectionResponse, \
     FaceDetectionRequest
 
@@ -34,6 +34,8 @@ class PerceptionServer():
         self.recogniser_srv = rospy.ServiceProxy('recognise_people_server', RecognisePeople)
 
         self.handler = rospy.Service("lasr_perception_server/detect_objects_image", DetectImage,
+                                     self.handle_task)
+        self.handler_1 = rospy.Service("lasr_perception_server/detect_objects_images", OneDetectionImage,
                                      self.handle_task)
 
     def yolo_detection(self, req):
@@ -79,7 +81,7 @@ class PerceptionServer():
             return DetectImageResponse(self.recogniser_srv(resp).detected_objects)
         else:
             resp = self.face_detect(req.image).detected_objects
-            return DetectImageResponse(resp)
+            return OneDetectionImageResponse(resp)
 
     def save_images_debugger(self, imgs):
         # * show the output image

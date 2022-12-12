@@ -5,7 +5,7 @@ import rospy
 
 from cv_bridge3 import CvBridge
 from cv_bridge3 import cv2
-from lasr_perception_server.srv import DetectImage
+from lasr_perception_server.srv import DetectImage, OneDetectionImage
 
 import os, random
 import rospkg
@@ -30,11 +30,11 @@ def continuous_perception_publisher():
 
     while not rospy.is_shutdown():
         # call the perception server
-        det = rospy.ServiceProxy("lasr_perception_server/detect_objects_image", DetectImage)
+        det = rospy.ServiceProxy("lasr_perception_server/detect_objects_images", OneDetectionImage)
         # im = rospy.wait_for_message('/usb_cam/image_raw', Image)
         im = rospy.wait_for_message('/xtion/rgb/image_raw', Image)
         imgs.append(im)
-        resp = det(imgs, "coco", 0.7, 0.3, ["person"], 'known_people').detected_objects
+        resp = det(im, "coco", 0.7, 0.3, "person", 'known_people').detected_objects
         imgs.clear()
         print(resp)
         resp = [r.name for r in resp]

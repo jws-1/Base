@@ -56,7 +56,7 @@ add_message_files(
 add_service_files(
    FILES
    DetectImage.srv
-   DetectImages.srv
+   OneDetectionImage.srv
 )
 
 ## Generate actions in the 'action' folder
