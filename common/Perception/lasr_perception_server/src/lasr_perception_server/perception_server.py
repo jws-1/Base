@@ -40,13 +40,13 @@ class PerceptionServer():
 
     def yolo_detection(self, req):
         print(req.task, 'the task')
-        if len(req.filter):
+        if isinstance(req.filter, list):
             resp = [det for det in self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects if
                  det.name in req.filter]
             return DetectImageResponse(resp)
         else:
-            return DetectImageResponse(
-                self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects)
+            return OneDetectionImageResponse(
+                self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects,req.timestamp)
 
     def face_detection(self, req):
         if isinstance(req.image, list):
@@ -57,7 +57,7 @@ class PerceptionServer():
             return DetectImageResponse(flat_list)
 
         else:
-            return DetectImageResponse(self.face_detect(req.image[0]).detected_objects)
+            return OneDetectionImageResponse(self.face_detect(req.image[0]).detected_objects, req.timestamp)
 
     # returns bbox of known and unknown people
     # check if the lists ar eempty and handle that
@@ -78,10 +78,10 @@ class PerceptionServer():
             detected_obj_open_cv = [item for sublist in detected_obj_open_cv for item in sublist]
             resp.detected_objects_yolo = detected_obj_yolo
             resp.detected_objects_opencv = detected_obj_open_cv
-            return DetectImageResponse(self.recogniser_srv(resp).detected_objects)
+            return DetectImageResponse(self.recogniser_srv(resp).detected_objects, req.timestamp)
         else:
             resp = self.face_detect(req.image).detected_objects
-            return OneDetectionImageResponse(resp)
+            return OneDetectionImageResponse(resp, req.timestamp)
 
     def save_images_debugger(self, imgs):
         # * show the output image

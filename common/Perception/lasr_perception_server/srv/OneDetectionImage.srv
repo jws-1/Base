@@ -4,5 +4,7 @@ float32 confidence
 float32 nms
 string filter
 string task
+int32 timestamp
 ---
 lasr_perception_server/Detection[] detected_objects
+int32 timestamp
