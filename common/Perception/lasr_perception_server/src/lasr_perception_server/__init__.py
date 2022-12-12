@@ -1,1 +1,2 @@
 from .feeder import looking_around_and_taking_imgs
+from .continuous_perception import continuous_perception_publisher
