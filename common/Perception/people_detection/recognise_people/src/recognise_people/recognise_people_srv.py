@@ -69,14 +69,14 @@ class RecognisePeopleServer():
             # print('face detections are more than yolo detections')
             for face in self.face_detections:
                 # Append detection
-                if face.confidence > 0.3:
+                if face.confidence > 0.5:
                     response.detected_objects.append(Detection(name=face.name, confidence=face.confidence,
                                                          xywh=face.xywh))
         elif len(self.face_detections) < 1 and len(self.yolo_detections) > 0:
             # print('yolo detections are more than face detections')
             for person in self.yolo_detections:
                 # Append detection.
-                if person.confidence > 0.3:
+                if person.confidence > 0.5:
                     response.detected_objects.append(
                         Detection(
                             name=person.name,

@@ -24,8 +24,10 @@ class SimpleMeetGreet:
         # define a callback for continuous perception
         # print(data, 'data')
         if data.data != 'person' and data.data != previous_name:
+        # if data.data != 'person':
             print(rospy.get_param('known_people'))
             self.voice.sync_tts("Good afternoon" + str(data.data))
+            rospy.delete_param('known_people/' + data.data)
             print('hi, ', str(data.data))
         # else:
         #     print('I dont known anyone')

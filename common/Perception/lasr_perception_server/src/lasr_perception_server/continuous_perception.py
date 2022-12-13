@@ -26,7 +26,7 @@ def continuous_perception_publisher():
     """
     # define a publisher for continuous perception
     continuous_perception_pub = rospy.Publisher('/continuous_perception', String, queue_size=10)
-    rate = rospy.Rate(10)
+    rate = rospy.Rate(20)
 
     while not rospy.is_shutdown():
         # call the perception server
@@ -36,7 +36,15 @@ def continuous_perception_publisher():
         else:
             topic = '/xtion/rgb/image_raw'
         im = rospy.wait_for_message(topic, Image)
-        resp = det(im, "coco", 0.7, 0.3, "person", 'known_people', rospy.Time.now().secs)
+        resp = det(im, "coco", 0.7, 0.8, "person", 'open_cv', rospy.Time.now().secs)
+        print(resp, 'resp')
+        # resp_f = []
+        # for human in resp.detected_objects:
+        #     if human.confidence> 0.6:
+        #         resp_f.append(human)
+        # resp.detected_objects = resp_f
+
+
         for human in resp.detected_objects:
             if human.name not in introduced_people.keys():
                 introduced_people[human.name] = resp.timestamp
@@ -48,10 +56,13 @@ def continuous_perception_publisher():
             # print('introduced_people', introduced_people)
             for human in list(introduced_people.keys()):
                 if rospy.Time.now().secs - introduced_people[human] > 10:
-                    rospy.delete_param('known_people/' + human)
-                    # print(rospy.get_param('known_people'), 'after deleting')
-                    del introduced_people[human]
-                    print('del published', introduced_people)
+                    try:
+                        rospy.delete_param('known_people/' + human)
+                        # print(rospy.get_param('known_people'), 'after deleting')
+                        del introduced_people[human]
+                        print('del published', introduced_people)
+                    except KeyError:
+                        pass
         # print('____________________SLEEPING____________________')
         rate.sleep()
 

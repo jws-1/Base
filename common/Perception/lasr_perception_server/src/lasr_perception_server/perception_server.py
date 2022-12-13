@@ -59,7 +59,7 @@ class PerceptionServer():
             return DetectImageResponse(flat_list)
 
         else:
-            return OneDetectionImageResponse(self.face_detect(req.image[0]).detected_objects, req.timestamp)
+            return OneDetectionImageResponse(self.face_detect(req.image).detected_objects, req.timestamp)
 
     # returns bbox of known and unknown people
     # check if the lists ar eempty and handle that
@@ -67,33 +67,33 @@ class PerceptionServer():
         detected_obj_yolo = []
         detected_obj_open_cv = []
         resp = RecognisePeopleRequest()
-        if isinstance(req.image, list):
-            for i in req.image:
-                # take opencv detection
-                detected_obj_open_cv.append(self.face_detect(i).detected_objects)
-                # take yolo detection
-                detected_obj_yolo.append(det for det in self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects if
-                    det.name in req.filter)
+        # if isinstance(req.image, list):
+        #     for i in req.image:
+        #         # take opencv detection
+        #         detected_obj_open_cv.append(self.face_detect(i).detected_objects)
+        #         # take yolo detection
+        #         detected_obj_yolo.append(det for det in self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects if
+        #             det.name in req.filter)
+        #
+        #
+        #     detected_obj_yolo = [item for sublist in detected_obj_yolo for item in sublist]
+        #     detected_obj_open_cv = [item for sublist in detected_obj_open_cv for item in sublist]
+        #     resp.detected_objects_yolo = detected_obj_yolo
+        #     resp.detected_objects_opencv = detected_obj_open_cv
+        #     return DetectImageResponse(self.recogniser_srv(resp).detected_objects, req.timestamp)
+        # else:
+        detected_obj_open_cv.append(self.face_detect(req.image).detected_objects)
+        # take yolo detection
+        detected_obj_yolo.append(det for det in self.yolo_detect(req.image, req.dataset, req.confidence, req.nms).detected_objects if
+                                 det.name in req.filter)
+        detected_obj_yolo = [item for sublist in detected_obj_yolo for item in sublist]
+        detected_obj_open_cv = [item for sublist in detected_obj_open_cv for item in sublist]
+        resp.detected_objects_yolo = detected_obj_yolo
+        resp.detected_objects_opencv = detected_obj_open_cv
 
-
-            detected_obj_yolo = [item for sublist in detected_obj_yolo for item in sublist]
-            detected_obj_open_cv = [item for sublist in detected_obj_open_cv for item in sublist]
-            resp.detected_objects_yolo = detected_obj_yolo
-            resp.detected_objects_opencv = detected_obj_open_cv
-            return DetectImageResponse(self.recogniser_srv(resp).detected_objects, req.timestamp)
-        else:
-            detected_obj_open_cv.append(self.face_detect(req.image).detected_objects)
-            # take yolo detection
-            detected_obj_yolo.append(det for det in self.yolo_detect(req.image, req.dataset, req.confidence, req.nms).detected_objects if
-                                     det.name in req.filter)
-            detected_obj_yolo = [item for sublist in detected_obj_yolo for item in sublist]
-            detected_obj_open_cv = [item for sublist in detected_obj_open_cv for item in sublist]
-            resp.detected_objects_yolo = detected_obj_yolo
-            resp.detected_objects_opencv = detected_obj_open_cv
-
-            resp_final = self.recogniser_srv(resp).detected_objects
-            print('the final resp is ', resp_final)
-            return OneDetectionImageResponse(resp_final, req.timestamp)
+        resp_final = self.recogniser_srv(resp).detected_objects
+        print('the final resp is ', resp_final)
+        return OneDetectionImageResponse(resp_final, req.timestamp)
 
     def save_images_debugger(self, imgs):
         # * show the output image
