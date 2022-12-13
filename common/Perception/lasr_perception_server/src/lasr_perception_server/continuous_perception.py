@@ -14,8 +14,10 @@ from lasr_perception_server.msg import Detection
 from std_msgs.msg import String
 
 IMAGES = 1
+introduced_people = {}
 
 def continuous_perception_publisher():
+    global introduced_people
     """
     This function is responsible for the continuous perception of the robot.
     It is called every time the robot is in the idle state.
@@ -25,18 +27,30 @@ def continuous_perception_publisher():
     # define a publisher for continuous perception
     continuous_perception_pub = rospy.Publisher('/continuous_perception', String, queue_size=10)
     print(' i initialised the pub')
-    rate = rospy.Rate(3)
+    rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
         # call the perception server
         det = rospy.ServiceProxy("lasr_perception_server/detect_objects_images", OneDetectionImage)
         # im = rospy.wait_for_message('/usb_cam/image_raw', Image)
-        im = rospy.wait_for_message('/xtion/rgb/image_raw', Image)
-        resp = det(im, "coco", 0.7, 0.3, "person", 'known_people', rospy.Time.now().nsecs).detected_objects
-        resp = [r.name for r in resp]
-        # publish the result
-        for r in set(resp):
-            continuous_perception_pub.publish(r)
+        if rospy.get_published_topics(namespace='/usb_cam'):
+            topic = '/usb_cam/image_raw'
+        else:
+            topic = '/xtion/rgb/image_raw'
+        im = rospy.wait_for_message(topic, Image)
+        resp = det(im, "coco", 0.7, 0.3, "person", 'known_people', rospy.Time.now().secs)
+        print(resp, 'resp')
+        for human in resp.detected_objects:
+            if human.name not in introduced_people:
+                introduced_people[human.name] = resp.timestamp
+                continuous_perception_pub.publish(human.name)
+        if introduced_people:
+            print('introduced_people', introduced_people)
+            for human in list(introduced_people.keys()):
+                if rospy.Time.now().secs - introduced_people[human] > 10:
+                    del introduced_people[human]
+                    print('del published', introduced_people)
+        print('____________________SLEEPING____________________')
         rate.sleep()
 
 
@@ -46,5 +60,5 @@ if __name__ == "__main__":
     rospy.loginfo("initialising the continuous perception publisher")
     try:
         continuous_perception_publisher()
-    except rospy.ROSInterruptException:
+    except rospy.ROSInterruptException and rospy.service.ServiceException and rospy.exceptions.ROSInterruptException:
         pass

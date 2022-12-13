@@ -23,6 +23,7 @@ class RecognisePeopleServer():
      #todo: get known people form rosparam or another funct
 
     def recogniser(self, req):
+        print('recogniser'* 3)
         response = RecognisePeopleResponse()
 
         self.yolo_detections = req.detected_objects_yolo
@@ -66,28 +67,24 @@ class RecognisePeopleServer():
         if len(self.face_detections) > len(self.yolo_detections) and len(self.face_detections) > 0:
             for face in self.face_detections:
                 # Append detection
-                response.detected_objects.append(
-                    Detection(
-                        name=face.name,
-                        confidence=face.confidence,
-                        xywh=face.xywh
-                    )
-                )
-                print('the face recognitons are', face)
+                if face.confidence > 0.5:
+                    response.detected_objects.append(Detection(name=face.name, confidence=face.confidence,
+                                                         xywh=face.xywh))
         elif len(self.face_detections) < 1 and len(self.yolo_detections) > 0:
             for person in self.yolo_detections:
                 # Append detection.
-                response.detected_objects.append(
-                    Detection(
-                        name=person.name,
-                        confidence=person.confidence,
-                        xywh=person.xywh
+                if person.confidence > 0.4:
+                    response.detected_objects.append(
+                        Detection(
+                            name=person.name,
+                            confidence=person.confidence,
+                            xywh=person.xywh
+                        )
                     )
-                )
         else:
             response = []
 
-        print(response)
+        print(response, '~'*40)
         return response
 
     def image_show(self, name, proba, dim, i):

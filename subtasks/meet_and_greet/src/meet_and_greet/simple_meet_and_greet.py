@@ -63,7 +63,12 @@ class SimpleMeetGreet:
 
     def perception_cb(self,data):
         # define a callback for continuous perception
-        rospy.loginfo(data.data)
+        if data.data != 'person':
+            # self.voice.sync_tts("Hi" + str(data.data))
+            print('hi, ', str(data.data))
+        else:
+            print('I dont known anyone')
+            # self.voice.sync_tts('I dont known anyone')
 
     def main(self):
         # pos = get_pose_from_param('/door')
