@@ -35,10 +35,10 @@ class CreateDatasetState(smach.State):
         self.semaphore = False
 
         # Choose topic
-        if rospy.get_published_topics(namespace='/xtion'):
-            self.topic = '/xtion/rgb/image_raw'
-        else:
-            self.topic = '/usb_cam/image_raw'
+        # if rospy.get_published_topics(namespace='/xtion'):
+        #     self.topic = '/xtion/rgb/image_raw'
+        # else:
+        self.topic = '/usb_cam/image_raw'
 
         self.sub = rospy.Subscriber(self.topic, Image, self.img_callback)
 

@@ -26,21 +26,17 @@ def continuous_perception_publisher():
     """
     # define a publisher for continuous perception
     continuous_perception_pub = rospy.Publisher('/continuous_perception', String, queue_size=10)
-    print(' i initialised the pub')
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
-        print(' i initialised the pub 2')
         # call the perception server
         det = rospy.ServiceProxy("lasr_perception_server/detect_objects_images", OneDetectionImage)
-        # im = rospy.wait_for_message('/usb_cam/image_raw', Image)
         if rospy.get_published_topics(namespace='/usb_cam'):
             topic = '/usb_cam/image_raw'
         else:
             topic = '/xtion/rgb/image_raw'
         im = rospy.wait_for_message(topic, Image)
         resp = det(im, "coco", 0.7, 0.3, "person", 'known_people', rospy.Time.now().secs)
-        print(resp, 'resp')
         for human in resp.detected_objects:
             if human.name not in introduced_people:
                 introduced_people[human.name] = resp.timestamp

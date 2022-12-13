@@ -16,8 +16,8 @@ class TrainModelState(smach.State):
 
 
     def execute(self, userdata):
-        name = 'matteo'
-        dataset_path = os.path.join(rospkg.RosPack().get_path('create_dataset'),  'dataset', 'mateo')
+        name = 'nicole'
+        dataset_path = os.path.join(rospkg.RosPack().get_path('create_dataset'),  'dataset', 'eznqyhe')
         new = dataset_path.replace(dataset_path.split(os.path.sep)[-1], name)
         if os.path.exists(new):
             shutil.rmtree(new)
