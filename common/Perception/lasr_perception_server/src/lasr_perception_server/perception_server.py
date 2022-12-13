@@ -90,6 +90,7 @@ class PerceptionServer():
             resp.detected_objects_opencv = detected_obj_open_cv
 
             resp_final = self.recogniser_srv(resp).detected_objects
+            print('the final resp is ', resp_final)
             return OneDetectionImageResponse(resp_final, req.timestamp)
 
     def save_images_debugger(self, imgs):

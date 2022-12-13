@@ -23,7 +23,6 @@ class RecognisePeopleServer():
      #todo: get known people form rosparam or another funct
 
     def recogniser(self, req):
-        print('recogniser'* 3)
         response = RecognisePeopleResponse()
 
         self.yolo_detections = req.detected_objects_yolo
@@ -63,17 +62,20 @@ class RecognisePeopleServer():
 
         print('-'* 40)
         print(detection_map, 'detection map\n')
+        print(len(self.face_detections), '-'* 40)
+        print(len(self.yolo_detections), '+'* 40)
 
         if len(self.face_detections) > len(self.yolo_detections) and len(self.face_detections) > 0:
+            print('face detections are more than yolo detections')
             for face in self.face_detections:
                 # Append detection
-                if face.confidence > 0.5:
+                if face.confidence > 0.3:
                     response.detected_objects.append(Detection(name=face.name, confidence=face.confidence,
                                                          xywh=face.xywh))
         elif len(self.face_detections) < 1 and len(self.yolo_detections) > 0:
             for person in self.yolo_detections:
                 # Append detection.
-                if person.confidence > 0.4:
+                if person.confidence > 0.3:
                     response.detected_objects.append(
                         Detection(
                             name=person.name,
