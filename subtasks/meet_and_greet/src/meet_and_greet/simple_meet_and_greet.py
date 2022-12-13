@@ -48,7 +48,7 @@ class SimpleMeetGreet:
                 if human.name == 'person':
                     counter = counter + 1
                 else:
-                    self.voice.sync_tts("Hi" +str(human.name))
+                    # self.voice.sync_tts("Hi" +str(human.name))
 
                     print('hi, ', human.name)
             if counter > 0:

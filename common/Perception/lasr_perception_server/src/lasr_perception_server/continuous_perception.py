@@ -30,6 +30,7 @@ def continuous_perception_publisher():
     rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
+        print(' i initialised the pub 2')
         # call the perception server
         det = rospy.ServiceProxy("lasr_perception_server/detect_objects_images", OneDetectionImage)
         # im = rospy.wait_for_message('/usb_cam/image_raw', Image)

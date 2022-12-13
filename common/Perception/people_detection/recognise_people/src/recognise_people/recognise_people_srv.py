@@ -28,12 +28,9 @@ class RecognisePeopleServer():
         self.yolo_detections = req.detected_objects_yolo
         self.face_detections = req.detected_objects_opencv
         detection_map = {}
-        # print(self.face_detections[0].name)
-        # print('-'*40)
-        # print(self.yolo_detections[0].name)
         i = 0
         if len(self.yolo_detections) < 1 and len(self.face_detections) < 1:
-            print('empty resp')
+            rospy.loginfo('empty resp')
             return response
 
         # get bb of person using face bb and body bb
@@ -41,7 +38,7 @@ class RecognisePeopleServer():
         for face in self.face_detections:
             for yolo in self.yolo_detections:
                 x1, y1, x2, y2 = face.xywh
-                print(yolo, 'the yoloooo ')
+                # print(yolo, 'the yoloooo ')
 
                 head_x = (x1 + x2) / 2
                 body_x = (yolo.xywh[0] + yolo.xywh[2]) / 2 # center of the body in the x axis
@@ -50,9 +47,9 @@ class RecognisePeopleServer():
 
                 if abs(head_x - body_x) < 20:
                     if not face.name in detection_map.keys():
-                        print('detection map', face, yolo)
+                        # print('detection map', face, yolo)
                         detection_map[face.name] = (face, yolo)
-                        print("yolo detection here, bb overlapped.")
+                        rospy.loginfo("yolo detection here, bb overlapped.")
                         break
                     # if newer detection has bigger confidence
                     if yolo.confidence > detection_map[face.name][1].confidence:
@@ -60,19 +57,23 @@ class RecognisePeopleServer():
                 else:
                     print(face.name, face.xywh, yolo.xywh)
 
-        print('-'* 40)
-        print(detection_map, 'detection map\n')
-        print(len(self.face_detections), '-'* 40)
-        print(len(self.yolo_detections), '+'* 40)
+        # print()
+        # print('-'* 40)
+        # print(detection_map, 'detection map\n')
+        # print(len(self.yolo_detections), '+'* 40)
+        # print(len(self.face_detections), '-'* 40)
+        # print()
+        # print('-'* 40)
 
-        if len(self.face_detections) > len(self.yolo_detections) and len(self.face_detections) > 0:
-            print('face detections are more than yolo detections')
+        if len(self.face_detections) >= len(self.yolo_detections) and len(self.face_detections) > 0:
+            # print('face detections are more than yolo detections')
             for face in self.face_detections:
                 # Append detection
                 if face.confidence > 0.3:
                     response.detected_objects.append(Detection(name=face.name, confidence=face.confidence,
                                                          xywh=face.xywh))
         elif len(self.face_detections) < 1 and len(self.yolo_detections) > 0:
+            # print('yolo detections are more than face detections')
             for person in self.yolo_detections:
                 # Append detection.
                 if person.confidence > 0.3:
@@ -86,7 +87,7 @@ class RecognisePeopleServer():
         else:
             response = []
 
-        print(response, '~'*40)
+        # print(response, '~'*40)
         return response
 
     def image_show(self, name, proba, dim, i):

@@ -39,14 +39,16 @@ class PerceptionServer():
                                      self.handle_task)
 
     def yolo_detection(self, req):
-        print(req.task, 'the task')
-        if isinstance(req.filter, list):
-            resp = [det for det in self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects if
+        # if isinstance(req.image, list):
+        if len(req.filter):
+            resp = [det for det in self.yolo_detect(req.image, req.dataset, req.confidence, req.nms).detected_objects if
                  det.name in req.filter]
-            return DetectImageResponse(resp)
+            # return DetectImageResponse(resp)
+            return OneDetectionImageResponse(
+                resp,req.timestamp)
         else:
             return OneDetectionImageResponse(
-                self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects,req.timestamp)
+                self.yolo_detect(req.image, req.dataset, req.confidence, req.nms).detected_objects,req.timestamp)
 
     def face_detection(self, req):
         if isinstance(req.image, list):
