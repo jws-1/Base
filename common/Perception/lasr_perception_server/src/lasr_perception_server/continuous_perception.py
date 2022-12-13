@@ -38,16 +38,21 @@ def continuous_perception_publisher():
         im = rospy.wait_for_message(topic, Image)
         resp = det(im, "coco", 0.7, 0.3, "person", 'known_people', rospy.Time.now().secs)
         for human in resp.detected_objects:
-            if human.name not in introduced_people:
+            if human.name not in introduced_people.keys():
                 introduced_people[human.name] = resp.timestamp
+                print('publishing', human.name)
                 continuous_perception_pub.publish(human.name)
+                rospy.set_param('known_people', introduced_people)
+                print(rospy.get_param('known_people'))
         if introduced_people:
-            print('introduced_people', introduced_people)
+            # print('introduced_people', introduced_people)
             for human in list(introduced_people.keys()):
                 if rospy.Time.now().secs - introduced_people[human] > 10:
+                    rospy.delete_param('known_people/' + human)
+                    # print(rospy.get_param('known_people'), 'after deleting')
                     del introduced_people[human]
                     print('del published', introduced_people)
-        print('____________________SLEEPING____________________')
+        # print('____________________SLEEPING____________________')
         rate.sleep()
 
 
