@@ -67,21 +67,6 @@ class PerceptionServer():
         detected_obj_yolo = []
         detected_obj_open_cv = []
         resp = RecognisePeopleRequest()
-        # if isinstance(req.image, list):
-        #     for i in req.image:
-        #         # take opencv detection
-        #         detected_obj_open_cv.append(self.face_detect(i).detected_objects)
-        #         # take yolo detection
-        #         detected_obj_yolo.append(det for det in self.yolo_detect(req.image[0], req.dataset, req.confidence, req.nms).detected_objects if
-        #             det.name in req.filter)
-        #
-        #
-        #     detected_obj_yolo = [item for sublist in detected_obj_yolo for item in sublist]
-        #     detected_obj_open_cv = [item for sublist in detected_obj_open_cv for item in sublist]
-        #     resp.detected_objects_yolo = detected_obj_yolo
-        #     resp.detected_objects_opencv = detected_obj_open_cv
-        #     return DetectImageResponse(self.recogniser_srv(resp).detected_objects, req.timestamp)
-        # else:
         detected_obj_open_cv.append(self.face_detect(req.image).detected_objects)
         # take yolo detection
         detected_obj_yolo.append(det for det in self.yolo_detect(req.image, req.dataset, req.confidence, req.nms).detected_objects if

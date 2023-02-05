@@ -17,7 +17,7 @@ IMAGES = 1
 introduced_people = {}
 
 def continuous_perception_publisher():
-    global introduced_people
+    global spotted_people
     """
     This function is responsible for the continuous perception of the robot.
     It is called every time the robot is in the idle state.
@@ -36,14 +36,8 @@ def continuous_perception_publisher():
         else:
             topic = '/xtion/rgb/image_raw'
         im = rospy.wait_for_message(topic, Image)
-        resp = det(im, "coco", 0.7, 0.8, "person", 'open_cv', rospy.Time.now().secs)
+        resp = det(im, "coco", 0.9, 0.8, "person", 'known_people', rospy.Time.now().secs)
         print(resp, 'resp')
-        # resp_f = []
-        # for human in resp.detected_objects:
-        #     if human.confidence> 0.6:
-        #         resp_f.append(human)
-        # resp.detected_objects = resp_f
-
 
         for human in resp.detected_objects:
             if human.name not in introduced_people.keys():
@@ -53,17 +47,19 @@ def continuous_perception_publisher():
                 rospy.set_param('known_people', introduced_people)
                 print(rospy.get_param('known_people'))
         if introduced_people:
-            # print('introduced_people', introduced_people)
+            print('introduced_people', introduced_people, 'before deleting')
             for human in list(introduced_people.keys()):
-                if rospy.Time.now().secs - introduced_people[human] > 10:
+                if rospy.Time.now().secs - introduced_people[human] > 5:
                     try:
                         rospy.delete_param('known_people/' + human)
-                        # print(rospy.get_param('known_people'), 'after deleting')
+                    except KeyError:
+                        pass
+                    try:
                         del introduced_people[human]
                         print('del published', introduced_people)
                     except KeyError:
                         pass
-        # print('____________________SLEEPING____________________')
+            # print('____________________SLEEPING____________________')
         rate.sleep()
 
 

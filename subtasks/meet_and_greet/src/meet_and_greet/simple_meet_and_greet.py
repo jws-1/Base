@@ -13,6 +13,9 @@ from lasr_perception_server.msg import Detection
 from std_msgs.msg import String
 
 previous_name = ""
+introduced_people = {}
+
+
 class SimpleMeetGreet:
     def __init__(self):
         self.continuous_perception_sub = None
@@ -23,22 +26,78 @@ class SimpleMeetGreet:
         global previous_name
         # define a callback for continuous perception
         # print(data, 'data')
-        if data.data != 'person' and data.data != previous_name:
-        # if data.data != 'person':
+        if data.data != 'person' and data.data not in introduced_people.keys():
+        # if data.data != 'person' and data.data != previous_name:
+            # if data.data != 'person':
             print(rospy.get_param('known_people'))
             self.voice.sync_tts("Good afternoon" + str(data.data))
-            rospy.delete_param('known_people/' + data.data)
+            try:
+                rospy.delete_param('known_people/' + data.data)
+            except KeyError:
+                pass
             print('hi, ', str(data.data))
+            introduced_people[data.data] = rospy.Time.now().secs
         # else:
         #     print('I dont known anyone')
-            # self.voice.sync_tts('I dont known anyone')
+        # self.voice.sync_tts('I dont known anyone')
         previous_name = data.data
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+         # """
+         #    if rospy.has_param('/introduced_people'):
+         #        introduced_people = rospy.get_param('/introduced_people')
+         #    else:
+         #        introduced_people = {}
+         #    if data.data in introduced_people.keys() and rospy.Time.now().secs - introduced_people[data.data] > 10:
+         #        del introduced_people[data.data]
+         #        rospy.set_param('/introduced_people', introduced_people)
+         #        print(introduced_people, 'del introduced people')
+         #
+            # global previous_name, previous_name_time
+            # if data.data != 'person' and data.data not in introduced_people.keys():
+            #     self.voice.sync_tts("Good afternoon" + str(data.data))
+            #     print('hi, ', str(data.data))
+            #     if rospy.has_param('/introduced_people'):
+            #         introduced_people[data.data] = rospy.Time.now().secs
+            #         rospy.set_param('/introduced_people', introduced_people)
+            #         print(introduced_people)
+         #        else:
+         #            rospy.set_param('/introduced_people', {})
+         #    # else:
+         #    #     print('I dont known anyone')
+         #    #     self.voice.sync_tts('I dont known anyone')
+         #    previous_name = data.data
+         #    # previous_name_time = rospy.Time.now().secs
+         #    """
+
     def main(self):
-        rate = rospy.Rate(15)
+        print('main')
+        # rate = rospy.Rate(15)
         while not rospy.is_shutdown():
             self.continuous_perception_sub = rospy.Subscriber('/continuous_perception', String, self.perception_cb)
-            rate.sleep()
+            if introduced_people:
+                print(introduced_people, 'introduced_people')
+                for person in list(introduced_people.keys()):
+                    print(person, 'person')
+                    print(rospy.Time.now().secs - introduced_people[person], 'rospy.Time.now().secs - introduced_people[person]')
+                    if rospy.Time.now().secs - introduced_people[person] > 5:
+                        # try:
+                        del introduced_people[person]
+                        # except:
+                        #     pass
+            # rate.sleep()
             # rospy.sleep(5)
 
 
