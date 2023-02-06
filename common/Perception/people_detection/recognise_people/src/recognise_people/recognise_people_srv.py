@@ -65,7 +65,7 @@ class RecognisePeopleServer():
                     min_dist = dist
                     best_face = face
             if best_face is not None:
-                if best_face.confidence > 0.8:
+                if best_face.confidence > 0.95:
                     response.detected_objects.append(Detection(name=best_face.name, confidence=best_face.confidence, xywh=self.yolo_detections[yolo].xywh))
 
 

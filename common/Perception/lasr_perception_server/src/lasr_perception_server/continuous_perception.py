@@ -36,7 +36,7 @@ def continuous_perception_publisher():
         else:
             topic = '/xtion/rgb/image_raw'
         im = rospy.wait_for_message(topic, Image)
-        resp = det(im, "coco", 0.9, 0.8, "person", 'known_people', rospy.Time.now().secs)
+        resp = det(im, "coco", 0.95, 0.8, "person", 'known_people', rospy.Time.now().secs)
         print(resp, 'resp')
 
         for human in resp.detected_objects:

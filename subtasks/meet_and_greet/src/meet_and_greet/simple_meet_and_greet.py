@@ -14,6 +14,7 @@ from std_msgs.msg import String
 
 previous_name = ""
 introduced_people = {}
+previous_stranger_time = 0
 
 
 class SimpleMeetGreet:
@@ -23,7 +24,7 @@ class SimpleMeetGreet:
 
 
     def perception_cb(self,data):
-        global previous_name
+        global previous_name, previous_stranger_time
         # define a callback for continuous perception
         # print(data, 'data')
         if data.data != 'person' and data.data not in introduced_people.keys():
@@ -37,50 +38,13 @@ class SimpleMeetGreet:
                 pass
             print('hi, ', str(data.data))
             introduced_people[data.data] = rospy.Time.now().secs
-        # else:
-        #     print('I dont known anyone')
-        # self.voice.sync_tts('I dont known anyone')
+        elif data.data == 'person' and rospy.Time.now().secs - previous_stranger_time > 5:
+            self.voice.sync_tts('Hi, Stranger')
+            previous_stranger_time = rospy.Time.now().secs
         previous_name = data.data
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-         # """
-         #    if rospy.has_param('/introduced_people'):
-         #        introduced_people = rospy.get_param('/introduced_people')
-         #    else:
-         #        introduced_people = {}
-         #    if data.data in introduced_people.keys() and rospy.Time.now().secs - introduced_people[data.data] > 10:
-         #        del introduced_people[data.data]
-         #        rospy.set_param('/introduced_people', introduced_people)
-         #        print(introduced_people, 'del introduced people')
-         #
-            # global previous_name, previous_name_time
-            # if data.data != 'person' and data.data not in introduced_people.keys():
-            #     self.voice.sync_tts("Good afternoon" + str(data.data))
-            #     print('hi, ', str(data.data))
-            #     if rospy.has_param('/introduced_people'):
-            #         introduced_people[data.data] = rospy.Time.now().secs
-            #         rospy.set_param('/introduced_people', introduced_people)
-            #         print(introduced_people)
-         #        else:
-         #            rospy.set_param('/introduced_people', {})
-         #    # else:
-         #    #     print('I dont known anyone')
-         #    #     self.voice.sync_tts('I dont known anyone')
-         #    previous_name = data.data
-         #    # previous_name_time = rospy.Time.now().secs
-         #    """
 
     def main(self):
         print('main')
