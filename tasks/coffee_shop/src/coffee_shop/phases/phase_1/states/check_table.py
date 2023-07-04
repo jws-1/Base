@@ -24,11 +24,9 @@ class CheckTable(smach.State):
 
     def perform_detection(self, min_xyz, max_xyz):
         pcl_msg = rospy.wait_for_message("/xtion/depth_registered/points", PointCloud2)
-        mask = self.mask_from_cuboid(pcl_msg, Point(*min_xyz), Point(*max_xyz)).mask
         cv_im = pcl_msg_to_cv2(pcl_msg)
-        cv_mask = self.bridge.imgmsg_to_cv2_np(mask)
         
-        img_msg = self.bridge.cv2_to_imgmsg(cv2.bitwise_and(cv_im, cv_im, mask=cv_mask))
+        img_msg = self.bridge.cv2_to_imgmsg(cv_im)
         detections = self.detect(img_msg, "coco", 0.7, 0.3)
         detections = [det for det in detections.detected_objects if det.name in OBJECTS]
         return detections
