@@ -27,7 +27,7 @@ class OpenPose():
         net_output = self.forward(image)
         keypoints = self.detect_keypoints(net_output, image)
 
-        keypoints_dict = {k : v for k, v in zip(self.labels, keypoints)}
+        keypoints_dict = {k : v for k, v in zip(self.labels, keypoints) if v is not None}
 
         if jsonify:
             class NumpyEncoder(json.JSONEncoder):
@@ -58,7 +58,10 @@ class OpenPose():
             for keypoint in self.get_keypoints(prob_map):
                 keypoints.append(keypoint + (idx,))
                 idx+=1
-            detected_keypoints.append(keypoints)
+            if len(keypoints):
+                detected_keypoints.append(max(keypoints, key=lambda x: x[2]))
+            else:
+                detected_keypoints.append(None)
         return detected_keypoints
 
 
