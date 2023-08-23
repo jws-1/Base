@@ -32,7 +32,7 @@ class Context:
     def __init__(self, config):
         with open(config) as fp:
             data = yaml.load(fp, Loader=yaml.SafeLoader)
-        self._tables = [ Table(int(k.replace("table", ""))) for k in data["tables"].keys() if k.startswith("table") ]
+        self._tables = [ Table(k) for k in data["tables"].keys() if k.startswith("table") ]
         self._currentTable = self.tables[0]
 
     def allVisited(self):
