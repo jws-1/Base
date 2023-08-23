@@ -10,10 +10,17 @@ class Table:
         READY = 2
         NEEDS_CLEANING = 3
         UNVISITED = 4
+        VISITING = 5
 
-    def __init__(self, idx):
+    def __init__(self, idx, location, objects_cuboid, persons_cuboid):
         self.idx = idx
+        self.location = location
+        self.objects_cuboid = objects_cuboid
+        self.persons_cuboid = persons_cuboid
         self.status = Table.Status.UNVISITED
+        self.order = []
+        self.given_order = []
+        self.prev_given_order = None
 
     def __repr__(self):
         return f"{self.idx} {self.statusString()}"
@@ -32,8 +39,8 @@ class Context:
     def __init__(self, config):
         with open(config) as fp:
             data = yaml.load(fp, Loader=yaml.SafeLoader)
-        self._tables = [ Table(k) for k in data["tables"].keys() if k.startswith("table") ]
-        self._currentTable = self.tables[0]
+        self._tables = [ Table(k, v["location"], v["objects_cuboid"], v["persons_cuboid"]) for k, v in data["tables"].items() if k.startswith("table") ]
+        self._current = self.tables[0]
 
     def allVisited(self):
         return not any([t.status == Table.Status.UNVISITED for t in self.tables])
@@ -53,4 +60,6 @@ class Context:
     def visit(self, table, status):
         table.status = status
 
+    def closest(self, x, y):
+        pass
 

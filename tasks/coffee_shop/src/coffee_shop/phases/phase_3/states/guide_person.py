@@ -2,6 +2,7 @@
 import smach
 import rospy
 from lasr_voice.voice import Voice
+from coffee_shop.core import Table
 from geometry_msgs.msg import Pose, Point, Quaternion
 
 class GuidePerson(smach.State):
@@ -9,13 +10,13 @@ class GuidePerson(smach.State):
         smach.State.__init__(self, outcomes=['done'])
         self.base_controller = base_controller
         self.voice_controller = voice_controller
+        self.context = context
 
     def execute(self, userdata):
-        tables = rospy.get_param("/tables")
-        empty_tables = [(label, table) for label, table in tables.items() if table["status"] == "ready"]
-        table, data = empty_tables[0]
-        position, orientation = data["location"]["position"], data["location"]["orientation"]
+        ready = self.context.ready()
+        table = ready[0]
+        position, orientation = table.location["position"], table.location["orientation"]
         self.base_controller.sync_to_pose(Pose(position=Point(**position), orientation=Quaternion(**orientation)))
         self.voice_controller.sync_tts("Please be seated!")
-        rospy.set_param(f"/tables/{table}/status", "needs serving")
+        table.status = Table.Status.NEEDS_SERVING
         return 'done'

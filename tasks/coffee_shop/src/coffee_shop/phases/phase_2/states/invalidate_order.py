@@ -7,11 +7,12 @@ class InvalidateOrder(smach.State):
     def __init__(self, voice_controller, context):
         smach.State.__init__(self, outcomes=['done'])
         self.voice_controller = voice_controller
+        self.context = context
 
     def execute(self, userdata):
-        order = rospy.get_param(f"/tables/{rospy.get_param('current_table')}/order")
-        previous_given_order = rospy.get_param(f"/tables/{rospy.get_param('current_table')}/previous_given_order", None)
-        given_order = rospy.get_param(f"/tables/{rospy.get_param('current_table')}/given_order")
+        order = self.context.current().order
+        previous_given_order = self.context.current().prev_given_order
+        given_order = self.context.current().given_order
 
         if previous_given_order == given_order:
             rospy.sleep(rospy.Duration(5.0))
@@ -30,5 +31,5 @@ class InvalidateOrder(smach.State):
         else:
             self.voice_controller.sync_tts(f"You have given me {invalid_items_string} which I didn't ask for, and didn't give me {missing_items_string} which I asked for. Please correct the order.")
         rospy.sleep(rospy.Duration(5.0))
-        rospy.set_param(f"/tables/{rospy.get_param('current_table')}/previous_given_order", given_order)
+        self.context.current().prev_given_order = given_order
         return 'done'

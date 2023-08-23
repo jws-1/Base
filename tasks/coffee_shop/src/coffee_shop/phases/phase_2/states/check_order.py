@@ -25,6 +25,7 @@ class CheckOrder(smach.State):
         self.detect = yolo
         self.tf = tf
         self.play_motion_client = pm
+        self.context = context
         self.bridge = CvBridge()
 
         service_list = rosservice.get_service_list()
@@ -49,7 +50,7 @@ class CheckOrder(smach.State):
 
         pm_goal = PlayMotionGoal(motion_name="back_to_default", skip_planning=True)
         self.play_motion_client.send_goal_and_wait(pm_goal)
-        order = rospy.get_param(f"/tables/{rospy.get_param('current_table')}/order")
+        order = self.context.current().order
 
         counter_corners = rospy.get_param(f"/counter/cuboid")
 
@@ -60,7 +61,7 @@ class CheckOrder(smach.State):
         detections = [(det, self.estimate_pose(pcl_msg, det)) for det in detections.detected_objects if det.name in OBJECTS]
         satisfied_points = shapely.are_points_in_polygon_2d(counter_corners, [[pose[0], pose[1]] for (_, pose) in detections]).inside
         given_order = [detections[i][0].name for i in range(0, len(detections)) if satisfied_points[i]]
-        rospy.set_param(f"/tables/{rospy.get_param('current_table')}/given_order", given_order)
+        self.context.current().given_order = given_order
 
         res = self.start_head_manager.call("head_manager", '')
 

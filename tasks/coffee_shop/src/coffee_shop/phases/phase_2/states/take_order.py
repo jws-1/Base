@@ -10,9 +10,10 @@ class TakeOrder(smach.State):
         smach.State.__init__(self, outcomes=['done'])
         self.head_controller = head_controller
         self.voice_controller = voice_controller
+        self.context = context
 
     def execute(self, userdata):
         self.voice_controller.sync_tts("Can I please take your order?")
         self.voice_controller.sync_tts(f"MOCK ORDER: {' '.join(MOCK_ORDER)}")
-        rospy.set_param(f"/tables/{rospy.get_param('/current_table')}/order", MOCK_ORDER)
+        self.context.current().order = MOCK_ORDER
         return 'done'

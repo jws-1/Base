@@ -16,6 +16,7 @@ from lasr_voice.voice import Voice
 from pcl_segmentation.srv import SegmentCuboid, Centroid, MaskFromCuboid, SegmentBB
 from common_math import pcl_msg_to_cv2, seg_to_centroid
 from coffee_shop.srv import TfTransform, TfTransformRequest
+from coffee_shop.core import Table
 import numpy as np
 from actionlib_msgs.msg import GoalStatus
 import ros_numpy as rnp
@@ -56,6 +57,7 @@ class CheckTable(smach.State):
         self.play_motion_client = pm
         self.detect = yolo
         self.tf = tf
+        self.context = context
         self.bridge = CvBridge()
         self.detections_objects = []
         self.detections_people = []
@@ -127,13 +129,13 @@ class CheckTable(smach.State):
         result = self.stop_head_manager.call("head_manager")
         
         self.voice_controller.sync_tts("I am going to check the table")
-        self.current_table = rospy.get_param("current_table")
-        self.object_debug_images = []
-        self.people_debug_images = []
 
+        current_table = self.context.current()
         rospy.loginfo(self.current_table)
-        self.object_polygon = rospy.get_param(f"/tables/{self.current_table}/objects_cuboid")
-        self.person_polygon = rospy.get_param(f"/tables/{self.current_table}/persons_cuboid")
+
+        self.object_polygon = current_table.objects_cuboid
+        self.person_polygon = current_table.person_cuboid
+
         self.detections_objects = []
         self.detections_people = []
 
@@ -145,15 +147,15 @@ class CheckTable(smach.State):
             pcl_msg = rospy.wait_for_message("/xtion/depth_registered/points", PointCloud2)
             self.check(pcl_msg)
 
-        status = "unknown"
+        status = Table.Status.VISITING
         if len(self.detections_objects) > 0 and len(self.detections_people) == 0:
-            status = "needs cleaning"
+            status = Table.Status.NEEDS_CLEANING
         elif len(self.detections_objects) > 0 and len(self.detections_people) > 0:
-            status = "served"
+            status = Table.Status.SERVED
         elif len(self.detections_objects) == 0 and len(self.detections_people) > 0:
-            status = "needs serving"
+            status = Table.Status.NEEDS_SERVING
         elif len(self.detections_objects) == 0 and len(self.detections_people) == 0:
-            status = "ready"
+            status = Table.Status.READY
 
         #self.detection_sub.unregister()
  
@@ -163,14 +165,14 @@ class CheckTable(smach.State):
         self.publish_object_points()
         self.publish_people_points()
 
-        rospy.set_param(f"/tables/{self.current_table}/status/", status)
+        current_table.status = status
 
         people_count = len(self.detections_people)
         people_text = "person" if people_count == 1 else "people"
-        status_text = f"The status of this table is {status}."
+        status_text = f"The status of this table is {current_table.statusString()}."
         count_text = f"There {'is' if people_count == 1 else 'are'} {people_count} {people_text}."
         self.voice_controller.sync_tts(f"{status_text} {count_text}")
 
         res = self.start_head_manager.call("head_manager", '')
 
-        return 'finished' if len([(label, table) for label, table in rospy.get_param("/tables").items() if table["status"] == "unvisited"]) == 0 else 'not_finished'
+        return 'finished' if self.context.allVisited() else 'not finished'
