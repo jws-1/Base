@@ -8,6 +8,8 @@ import actionlib
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 from lasr_object_detection_yolo.srv import YoloDetection
 from coffee_shop.srv import TfTransform, TfTransformRequest
+from coffee_shop.core import Context
+import sys
 
 if __name__ == "__main__":
     rospy.init_node("coffee_shop")
@@ -20,7 +22,8 @@ if __name__ == "__main__":
     rospy.wait_for_service("/tf_transform", rospy.Duration(15.0))
     tf = rospy.ServiceProxy("/tf_transform", TfTransform)
     voice = Voice()
-    coffee_shop = CoffeeShop(BaseController(), HeadController(), voice, yolo, tf, play_motion_client)
+    context = Context(sys.argv[1])
+    coffee_shop = CoffeeShop(BaseController(), HeadController(), voice, yolo, tf, play_motion_client, context)
     outcome = coffee_shop.execute()
     voice.sync_tts("I am done.")
     rospy.spin()

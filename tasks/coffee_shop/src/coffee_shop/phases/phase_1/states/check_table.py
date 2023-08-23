@@ -49,7 +49,7 @@ def create_point_marker(x, y, z, idx, frame, r,g,b):
     return marker_msg
 
 class CheckTable(smach.State):
-    def __init__(self, head_controller, voice_controller, yolo, tf, pm):
+    def __init__(self, head_controller, voice_controller, yolo, tf, pm, context):
         smach.State.__init__(self, outcomes=['not_finished', 'finished'])
         self.head_controller = head_controller
         self.voice_controller = voice_controller

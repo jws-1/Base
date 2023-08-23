@@ -5,7 +5,7 @@ from collections import Counter
 
 class MakeOrder(smach.State):
 
-    def __init__(self, voice_controller):
+    def __init__(self, voice_controller, context):
         smach.StateMachine.__init__(self, outcomes=['done'])
         self.voice_controller = voice_controller
 

@@ -4,7 +4,7 @@ import rospy
 from collections import Counter
 
 class InvalidateOrder(smach.State):
-    def __init__(self, voice_controller):
+    def __init__(self, voice_controller, context):
         smach.State.__init__(self, outcomes=['done'])
         self.voice_controller = voice_controller
 

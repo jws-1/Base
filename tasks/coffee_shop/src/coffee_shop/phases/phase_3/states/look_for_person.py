@@ -19,7 +19,7 @@ from lasr_shapely import LasrShapely
 shapely = LasrShapely()
 
 class LookForPerson(smach.State):
-    def __init__(self, yolo, tf, pm):
+    def __init__(self, yolo, tf, pm, context):
         smach.State.__init__(self, outcomes=['found', 'not found'])
         self.detect = yolo
         self.tf = tf
