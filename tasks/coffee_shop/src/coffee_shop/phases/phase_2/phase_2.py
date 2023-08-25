@@ -1,5 +1,5 @@
 import smach
-from .states import TakeOrder, MakeOrder, CheckOrder, GoToTable, DeliverOrder, GoToCounter, InvalidateOrder, HandOverOrder, Start
+from .states import TakeOrder, MakeOrder, CheckOrder, GoToTable, DeliverOrder, GoToCounter, HandOverOrder, Start
 
 class Phase2(smach.StateMachine):
     def __init__(self, base_controller, head_controller, voice_controller, yolo, tf, pm, context):
@@ -11,7 +11,7 @@ class Phase2(smach.StateMachine):
             smach.StateMachine.add('TAKE_ORDER', TakeOrder(head_controller, voice_controller, context), transitions={'done' : 'GO_TO_COUNTER'})
             smach.StateMachine.add('GO_TO_COUNTER', GoToCounter(base_controller, voice_controller, context), transitions={'done' : 'MAKE_ORDER'})
             smach.StateMachine.add('MAKE_ORDER', MakeOrder(voice_controller, context), transitions={'done' : 'CHECK_ORDER'})
-            smach.StateMachine.add('CHECK_ORDER', CheckOrder(yolo, tf, pm, context), transitions={'correct' : 'DELIVER_ORDER', 'incorrect' : 'INVALIDATE_ORDER'})
-            smach.StateMachine.add('INVALIDATE_ORDER', InvalidateOrder(voice_controller, context), transitions={'done' : 'CHECK_ORDER'})
+            smach.StateMachine.add('CHECK_ORDER', CheckOrder(voice_controller, yolo, tf, pm, context), transitions={'correct' : 'DELIVER_ORDER', 'incorrect' : 'CHECK_ORDER'})
             smach.StateMachine.add('DELIVER_ORDER', DeliverOrder(base_controller, voice_controller, context), transitions={'done' : 'HAND_OVER_ORDER'})
             smach.StateMachine.add('HAND_OVER_ORDER', HandOverOrder(voice_controller, context), transitions={'done' : 'done'})
+g

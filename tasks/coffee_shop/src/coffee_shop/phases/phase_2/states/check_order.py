@@ -13,6 +13,7 @@ from cv_bridge3 import CvBridge, cv2
 from pal_startup_msgs.srv import StartupStart, StartupStop
 import rosservice
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
+from collections import Counter
 
 from lasr_shapely import LasrShapely
 shapely = LasrShapely()
@@ -20,13 +21,15 @@ shapely = LasrShapely()
 OBJECTS = ["cup", "mug", "bowl"]
 
 class CheckOrder(smach.State):
-    def __init__(self, yolo, tf, pm, context):
+    def __init__(self, voice_controller, yolo, tf, pm, context):
         smach.State.__init__(self, outcomes=['correct', 'incorrect'])
+        self.voice_controller = voice_controller
         self.detect = yolo
         self.tf = tf
         self.play_motion_client = pm
         self.context = context
         self.bridge = CvBridge()
+        self.prev_order = None
 
         service_list = rosservice.get_service_list()
         # This should allow simulation runs as well, as i don't think the head manager is running in simulation
@@ -65,4 +68,30 @@ class CheckOrder(smach.State):
 
         res = self.start_head_manager.call("head_manager", '')
 
-        return 'correct' if sorted(order) == sorted(given_order) else 'incorrect'
+        if sorted(order) == sorted(given_order):
+            return 'correct'
+        else:
+            if self.prev_order == given_order:
+                rospy.sleep(rospy.Duration(5.0))
+                return 'incorrect'
+
+            missing_items = list((Counter(order) - Counter(given_order)).elements())
+            missing_items_string = ', '.join([f"{count} {item if count == 1 else item+'s'}" for item, count in
+                                              Counter(missing_items).items()]).replace(', ', ', and ',
+                                                                                       len(missing_items) - 2)
+            invalid_items = list((Counter(given_order) - Counter(order)).elements())
+            invalid_items_string = ', '.join([f"{count} {item if count == 1 else item+'s'}" for item, count in
+                                              Counter(invalid_items).items()]).replace(', ', ', and ',
+                                                                                       len(invalid_items) - 2)
+            if not len(invalid_items):
+                self.voice_controller.sync_tts(
+                    f"You didn't give me {missing_items_string} which I asked for. Please correct the order.")
+            elif not len(missing_items):
+                self.voice_controller.sync_tts(
+                    f"You have given me {invalid_items_string} which I didn't ask for. Please correct the order.")
+            else:
+                self.voice_controller.sync_tts(
+                    f"You have given me {invalid_items_string} which I didn't ask for, and didn't give me {missing_items_string} which I asked for. Please correct the order.")
+            self.prev_order = given_order
+            rospy.sleep(rospy.Duration(5.0))
+            return 'incorrect'
