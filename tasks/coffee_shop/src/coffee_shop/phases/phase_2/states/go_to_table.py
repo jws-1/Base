@@ -2,7 +2,7 @@
 import smach
 import rospy
 from geometry_msgs.msg import Pose, Point, Quaternion
-
+from coffee_shop.core import Table
 
 class GoToTable(smach.State):
     
@@ -13,13 +13,14 @@ class GoToTable(smach.State):
         self.context = context
 
     def execute(self, userdata):
-        tables_need_serving = self.context.needsServing()
+        tables_need_serving = self.context.needs_serving()
         if not tables_need_serving:
             return 'skip'
         table = tables_need_serving[0]
         self.voice_controller.sync_tts(f"I am going to {table.idx}, which needs serving")
-        position = table.location["position"]
-        orientation = table.location["orientation"]
+        position = table.position
+        orientation = table.orientation
         self.base_controller.sync_to_pose(Pose(position=Point(**position), orientation=Quaternion(**orientation)))
-        rospy.set_param("/current_table", table)
+        self.context.visit(table, Table.Status.SERVING)
         return 'done'
+1

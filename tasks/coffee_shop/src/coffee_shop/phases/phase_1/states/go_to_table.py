@@ -13,12 +13,10 @@ class GoToTable(smach.State):
         self.context = context
 
     def execute(self, userdata):
-        unvisited_tables = self.context.unvisited()
         robot_x, robot_y = self.base_controller.get_pose()
-        closest_table = min(unvisited_tables, key=lambda table: np.linalg.norm(table.location["position"]["x"] - robot_x, table.location["position"]["y"] - robot_y))
+        closest_table = self.context.closest(robot_x, robot_y, Table.Status.UNVISITED)
         self.voice_controller.sync_tts(f"I am going to {closest_table.idx}")
-        position, orientation = closest_table.location["position"], closest_table.location["orientation"]
+        position, orientation = closest_table.position, closest_table.orientation
         self.base_controller.sync_to_pose(Pose(position=Point(**position), orientation=Quaternion(**orientation)))
-        closest_table.visit(Table.Status.VISITING)
-        self.context._current = closest_table
+        self.context.visit(closest_table, Table.Status.VISITING)
         return 'done'

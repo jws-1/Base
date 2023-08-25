@@ -165,14 +165,14 @@ class CheckTable(smach.State):
         self.publish_object_points()
         self.publish_people_points()
 
-        current_table.status = status
+        self.context.visit(current_table, status)
 
         people_count = len(self.detections_people)
         people_text = "person" if people_count == 1 else "people"
-        status_text = f"The status of this table is {current_table.statusString()}."
+        status_text = f"The status of this table is {current_table.status_string()}."
         count_text = f"There {'is' if people_count == 1 else 'are'} {people_count} {people_text}."
         self.voice_controller.sync_tts(f"{status_text} {count_text}")
 
         res = self.start_head_manager.call("head_manager", '')
 
-        return 'finished' if self.context.allVisited() else 'not finished'
+        return 'finished' if self.context.all_visited() else 'not finished'

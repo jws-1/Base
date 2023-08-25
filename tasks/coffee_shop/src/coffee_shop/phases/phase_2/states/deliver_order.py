@@ -11,9 +11,9 @@ class DeliverOrder(smach.State):
         self.context = context
 
     def execute(self, userdata):
-        self.voice_controller.sync_tts("I am going to deliver the order")
-        location = self.context.current().location
-        position = location["position"]
-        orientation = location["orientation"]
+        current = self.context().current()
+        self.voice_controller.sync_tts(f"I am going to deliver the order to {current.idx}")
+        position = current.position
+        orientation = current.orientation
         self.base_controller.sync_to_pose(Pose(position=Point(**position), orientation=Quaternion(**orientation)))
         return 'done'

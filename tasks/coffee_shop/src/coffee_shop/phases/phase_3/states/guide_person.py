@@ -15,8 +15,9 @@ class GuidePerson(smach.State):
     def execute(self, userdata):
         ready = self.context.ready()
         table = ready[0]
-        position, orientation = table.location["position"], table.location["orientation"]
+        position = table.position
+        orientation = table.orientation
         self.base_controller.sync_to_pose(Pose(position=Point(**position), orientation=Quaternion(**orientation)))
         self.voice_controller.sync_tts("Please be seated!")
-        table.status = Table.Status.NEEDS_SERVING
+        self.context.visit(table, Table.Status.NEEDS_SERVING)
         return 'done'

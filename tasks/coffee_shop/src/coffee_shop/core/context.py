@@ -1,7 +1,6 @@
 import yaml
 from enum import Enum
-from collections import defaultdict
-
+import numpy as np
 class Table:
 
     class Status(Enum):
@@ -11,21 +10,21 @@ class Table:
         NEEDS_CLEANING = 3
         UNVISITED = 4
         VISITING = 5
+        SERVING = 6
 
-    def __init__(self, idx, location, objects_cuboid, persons_cuboid):
+    def __init__(self, idx, position, orientation, objects_cuboid, persons_cuboid):
         self.idx = idx
-        self.location = location
+        self.position = position
+        self.orientation = orientation
         self.objects_cuboid = objects_cuboid
         self.persons_cuboid = persons_cuboid
         self.status = Table.Status.UNVISITED
         self.order = []
-        self.given_order = []
-        self.prev_given_order = None
 
     def __repr__(self):
-        return f"{self.idx} {self.statusString()}"
+        return f"{self.idx} {self.status_string()}"
 
-    def statusString(self):
+    def status_string(self):
         return {
             Table.Status.NEEDS_SERVING: "needs serving",
             Table.Status.SERVED: "served",
@@ -39,16 +38,16 @@ class Context:
     def __init__(self, config):
         with open(config) as fp:
             data = yaml.load(fp, Loader=yaml.SafeLoader)
-        self._tables = [ Table(k, v["location"], v["objects_cuboid"], v["persons_cuboid"]) for k, v in data["tables"].items() if k.startswith("table") ]
+        self._tables = [ Table(k, v["location"]["position"], v["location"]["orientation"], v["objects_cuboid"], v["persons_cuboid"]) for k, v in data["tables"].items() if k.startswith("table") ]
         self._current = self.tables[0]
 
-    def allVisited(self):
+    def all_visited(self):
         return not any([t.status == Table.Status.UNVISITED for t in self.tables])
     
     def unvisited(self):
         return [table for table in self._tables if table.status == Table.Status.UNVISITED]
 
-    def needsServing(self):
+    def needs_serving(self):
         return [table for table in self._tables if table.status == Table.Status.NEEDS_SERVING]
 
     def ready(self):
@@ -58,8 +57,9 @@ class Context:
         return self._currentTable
 
     def visit(self, table, status):
+        self._current = table
         table.status = status
 
-    def closest(self, x, y):
-        pass
+    def closest(self, x, y, status=None):
+        return min([t for t in self._tables if status is None or t.status == status], key=lambda t: np.linalg.norm(t.position["x"] - x, t.position["y"] - y))
 
