@@ -8,5 +8,5 @@ class Phase1(smach.StateMachine):
 
         with self:
             smach.StateMachine.add('START_PHASE_1', Start(voice_controller), transitions={'done' : 'GO_TO_TABLE'})
-            smach.StateMachine.add('GO_TO_TABLE', GoToTable(base_controller, voice_controller, start_head_mgr, stop_head_mgr), transitions={'done' : 'CHECK_TABLE'})
+            smach.StateMachine.add('GO_TO_TABLE', GoToTable(base_controller, voice_controller), transitions={'done' : 'CHECK_TABLE'})
             smach.StateMachine.add('CHECK_TABLE', CheckTable(head_controller, voice_controller, yolo, tf, pm, start_head_mgr, stop_head_mgr), transitions={'not_finished' : 'GO_TO_TABLE', 'finished' : 'done'})
