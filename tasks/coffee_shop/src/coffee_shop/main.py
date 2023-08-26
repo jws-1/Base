@@ -8,6 +8,16 @@ import actionlib
 from play_motion_msgs.msg import PlayMotionAction, PlayMotionGoal
 from lasr_object_detection_yolo.srv import YoloDetection
 from coffee_shop.srv import TfTransform, TfTransformRequest
+import rosservice
+
+HAS_HEAD_MANAGER = "pal_startup_control/stop" in rosservice.get_service_list()
+
+try:
+    from pal_startup_msgs.srv import StartupStart, StartupStop
+    HAS_HEAD_MANAGER &= True
+except ImportError:
+    HAS_HEAD_MANAGER = False
+    pass
 
 if __name__ == "__main__":
     rospy.init_node("coffee_shop")
@@ -20,7 +30,16 @@ if __name__ == "__main__":
     rospy.wait_for_service("/tf_transform", rospy.Duration(15.0))
     tf = rospy.ServiceProxy("/tf_transform", TfTransform)
     voice = Voice()
-    coffee_shop = CoffeeShop(BaseController(), HeadController(), voice, yolo, tf, play_motion_client)
+    if HAS_HEAD_MANAGER:
+        rospy.wait_for_service("/pal_startup_control/start")
+        start_head_manager = rospy.ServiceProxy("/pal_startup_control/start", StartupStart)
+        rospy.wait_for_service("/pal_startup_control/stop")
+        stop_head_manager = rospy.ServiceProxy("/pal_startup_control/stop", StartupStop)
+    else:
+        start_head_manager = lambda *args: None
+        stop_head_manager = lambda *args: None
+
+    coffee_shop = CoffeeShop(BaseController(), HeadController(), voice, yolo, tf, play_motion_client, start_head_manager, stop_head_manager)
     outcome = coffee_shop.execute()
     voice.sync_tts("I am done.")
     rospy.spin()
