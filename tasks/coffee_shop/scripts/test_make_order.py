@@ -12,6 +12,7 @@ if __name__ == "__main__":
     context.current_table = "table0"
     context.tables[context.current_table]["status"] = "currently serving"
     context.tables[context.current_table]["order"] = ["coffee_cup", "coffee_cup"]
+    context.target_object_remappings = {"coffee_cup" : "coffee", "pringles" : "pringles", "small_pringles" : "small_pringles"}
 
     with sm:
         sm.add('MAKE_ORDER', MakeOrder(context), transitions={'done' : 'WAIT_FOR_ORDER'})

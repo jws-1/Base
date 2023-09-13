@@ -39,10 +39,8 @@ class CheckOrder(smach.State):
         detections = [(det, self.estimate_pose(pcl_msg, det)) for det in detections.detected_objects if det.name in self.context.target_object_remappings.keys()]
         satisfied_points = self.context.shapely.are_points_in_polygon_2d(counter_corners, [[pose[0], pose[1]] for (_, pose) in detections]).inside
         given_order = [detections[i] for i in range(0, len(detections)) if satisfied_points[i]]
-
         for _, pose in given_order:
             self.context.publish_object_pose(*pose, "map")
-
         given_order = [detection[0].name for detection in given_order]
 
         if sorted(order) == sorted(given_order):
@@ -55,9 +53,10 @@ class CheckOrder(smach.State):
         rospy.loginfo(f"Order: {order}, Given order: {given_order}")
 
         if not len(invalid_items):
-            self.context.voice_controller.sync_tts(f"You didn't give me {missing_items_string} which I asked for. Please correct the order and say `finished` when you are ready for me to check it again.")
+            self.context.voice_controller.sync_tts(f"You didn't give me {missing_items_string} which I asked for. Please correct the order and say `I am finished` when you are ready for me to check it again.")
         elif not len(missing_items):
-            self.context.voice_controller.sync_tts(f"You have given me {invalid_items_string} which I didn't ask for. Please correct the order and say `finished` when you are ready for me to check it again.")
+            self.context.voice_controller.sync_tts(f"You have given me {invalid_items_string} which I didn't ask for. Please correct the order and say `I am finished` when you are ready for me to check it again.")
         else:
-            self.context.voice_controller.sync_tts(f"You have given me {invalid_items_string} which I didn't ask for, and didn't give me {missing_items_string} which I asked for. Please correct the order and say `finished` when you are ready for me to check it again.")
+            self.context.voice_controller.sync_tts(f"You have given me {invalid_items_string} which I didn't ask for, and didn't give me {missing_items_string} which I asked for. Please correct the order and say `I am finished` when you are ready for me to check it again.")
+        self.previous_given_order = given_order
         return 'incorrect'

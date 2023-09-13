@@ -8,7 +8,7 @@ if __name__ == "__main__":
     rospy.init_node("test_take_order")
     sm = smach.StateMachine(outcomes=['end'])
     context = Context()
-    context.target_object_remappings = {"coffee_cup" : "coffee"}
+    context.target_object_remappings = {"coffee_cup" : "coffee", "pringles" : "pringles", "small_pringles" : "small_pringles"}
 
     with sm:
         sm.add('TAKE_ORDER', TakeOrder(context), transitions={'done' : 'end'})

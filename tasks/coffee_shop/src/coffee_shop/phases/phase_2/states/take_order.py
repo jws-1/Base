@@ -4,6 +4,8 @@ import rospy
 import json
 from collections import Counter
 import difflib
+from play_motion_msgs.msg import PlayMotionGoal
+
 
 class TakeOrder(smach.State):
     
@@ -22,6 +24,7 @@ class TakeOrder(smach.State):
 
     def get_order(self):
         resp = self.listen()
+        rospy.loginfo(resp)
         if resp["intent"]["name"] != "make_order":
             self.context.voice_controller.sync_tts(self.context.get_random_retry_utterance())
             return self.get_order()
@@ -72,6 +75,8 @@ class TakeOrder(smach.State):
 
     def execute(self, userdata):
         self.context.stop_head_manager("head_manager")
+        pm_goal = PlayMotionGoal(motion_name="back_to_default", skip_planning=True)
+        self.context.play_motion_client.send_goal_and_wait(pm_goal)
         self.context.voice_controller.sync_tts("I'm TIAGo, I'll be your server today. Please state your order after the beep - this indicates that I am listening.")
         order = []
         while True:
