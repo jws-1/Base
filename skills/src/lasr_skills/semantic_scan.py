@@ -41,12 +41,12 @@ class SemanticScan(smach.StateMachine):
 
     def __init__(self):
 
-        smach.StateMachine.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['image_topic', 'semantic_location', 'filter'], output_keys=['bulk_detections'])
+        smach.StateMachine.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['image_topic', 'location', 'filter'], output_keys=['bulk_detections'])
 
         with self:
             
             self.userdata.bulk_detections = []
-            self.userdata.motions = rospy.get_param(f"/{self.userdata.semantic_location}/motions")
+            self.userdata.motions = rospy.get_param(f"/{self.userdata.location}/motions")
             # motions = rospy.get_param(f"/{self.userdata.semantic_location}/motions")
 
             # def motion_goal_cb():
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     with sm:
 
-        sm.userdata.semantic_location = "bedroom"
+        sm.userdata.location = "bedroom"
         sm.userdata.motions = ["look_down", "look_left", "look_right"]
         sm.userdata.filter = ["fork"]
         sm.userdata.image_topic = "/xtion/rgb/image_raw"
