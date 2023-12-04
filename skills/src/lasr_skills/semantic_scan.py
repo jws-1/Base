@@ -40,3 +40,9 @@ class SemanticScan(smach.StateMachine):
             smach.StateMachine.add('PLAY_MOTION', SimpleActionState('play_motion', PlayMotionAction, goal_cb=motion_goal_cb), transitions={'succeeded' : 'DETECT_OBJECTS', 'aborted' : 'failed'})
             smach.StateMachine.add('DETECT_OBJECTS', DetectObjects(), transitions={'succeeded' : 'PROCESS_DETECTIONS', 'failed' : 'failed'})
             smach.StateMachine.add('PROCESS_DETECTIONS', self.ProcessDetections(), transitions={'succeeded' : 'PLAY_MOTION', 'failed' : 'failed'})
+
+if __name__ == "__main__":
+    rospy.init_node("test_semantic_scan")
+    sm = SemanticScan()
+    sm.userdata.filter = ["fork"]
+    outcome = sm.execute()
