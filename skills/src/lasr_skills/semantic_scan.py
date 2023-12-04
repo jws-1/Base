@@ -36,17 +36,18 @@ class SemanticScan(smach.StateMachine):
             motion = userdata.motions.pop(0)
             play_motion_goal = PlayMotionGoal(motion_name=motion, skip_planning=True)
             self.play_motion_client.send_goal_and_wait(play_motion_goal)
+            rospy.sleep(1.0)
             return 'succeeded'
 
 
     def __init__(self):
 
-        smach.StateMachine.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['image_topic', 'location', 'filter'], output_keys=['bulk_detections'])
+        smach.StateMachine.__init__(self, outcomes=['succeeded', 'failed'], input_keys=['image_topic', 'location', 'filter', 'motions', 'bulk_detections'], output_keys=['bulk_detections'])
 
         with self:
             
             self.userdata.bulk_detections = []
-            self.userdata.motions = rospy.get_param(f"/{self.userdata.location}/motions")
+            # self.userdata.motions = rospy.get_param(f"/{self.userdata.location}/motions")
             # motions = rospy.get_param(f"/{self.userdata.semantic_location}/motions")
 
             # def motion_goal_cb():
