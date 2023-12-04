@@ -45,4 +45,5 @@ if __name__ == "__main__":
     rospy.init_node("test_semantic_scan")
     sm = SemanticScan()
     sm.userdata.filter = ["fork"]
+    sm.userdata.image_topic = "/xtion/rgb/image_raw"
     outcome = sm.execute()
