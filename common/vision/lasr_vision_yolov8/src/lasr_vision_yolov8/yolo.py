@@ -132,6 +132,10 @@ def detect_3d(
         if has_segment_masks:
             detection.xyseg = result.masks.xy[i].flatten().astype(int).tolist()
 
+            detection.cloud_seg = cv2_pcl.seg_to_cloud(
+                request.pcl, np.array(detection.xyseg)
+            )
+
             centroid = cv2_pcl.seg_to_centroid(request.pcl, np.array(detection.xyseg))
 
             point_stamped = PointStamped()

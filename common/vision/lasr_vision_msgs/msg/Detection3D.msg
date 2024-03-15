@@ -16,3 +16,5 @@ string target_frame
 int32[] xyseg
 
 geometry_msgs/Point point
+
+sensor_msgs/PointCloud2 seg_cloud

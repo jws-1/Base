@@ -78,3 +78,32 @@ def bb_to_centroid(pcl: PointCloud2, x: int, y: int, w: int, h: int) -> np.ndarr
 
     # Get mean (centroid) point.
     return np.nanmean(xyz_points, axis=0)
+
+
+def seg_pcl(pcl: PointCloud2, xyseg: np.ndarray) -> PointCloud2:
+    """
+    Extracts a pointcloud segment from a given pointcloud
+    """
+
+    # Convert xyseg to contours
+    contours = xyseg.reshape(-1, 2)
+
+    # cv2 image
+    cv_im = pcl_to_cv2(pcl)
+    # Compute mask from contours
+    mask = np.zeros(shape=cv_im.shape[:2])
+    cv2.fillPoly(mask, pts=[contours], color=(255, 255, 255))
+
+    # Extract mask indices from bounding box
+    indices = np.argwhere(mask)
+
+    if indices.shape[0] == 0:
+        return pcl
+
+    # Unpack pointcloud into xyz array
+    pcl_np = rnp.point_cloud2.pointcloud2_to_array(pcl)
+
+    # Mask by indices
+    pcl_np = pcl_np[indices]
+
+    return rnp.point_cloud2.array_to_pointcloud2(pcl_np, pcl.header)
