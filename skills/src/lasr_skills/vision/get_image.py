@@ -13,7 +13,7 @@ class GetImage(smach.State):
             self, outcomes=['succeeded', 'failed'], output_keys=['img_msg'])
 
         if topic is None:
-            self.topic = '/xtion/rgb/image_raw' if 'tiago' in os.environ['ROS_MASTER_URI'] else '/camera/image_raw'
+            self.topic = '/xtion/rgb/image_raw' if 'tiago' in os.environ['ROS_MASTER_URI'] else '/usb_cam/image_raw'
         else:
             self.topic = topic
 
@@ -26,8 +26,8 @@ class GetImage(smach.State):
             return 'failed'
 
         return 'succeeded'
-    
 
+      
 class GetPointCloud(smach.State):
     """
     State for acquiring a PointCloud2 message.
@@ -52,7 +52,7 @@ class GetPointCloud(smach.State):
 
         return 'succeeded'
 
-
+      
 class GetImageAndPointCloud(smach.State):
     """
     State for acquiring Image and PointCloud2 messages simultaneously.
@@ -76,4 +76,3 @@ class GetImageAndPointCloud(smach.State):
             return 'failed'
 
         return 'succeeded'
-
