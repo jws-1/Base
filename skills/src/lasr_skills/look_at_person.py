@@ -18,10 +18,15 @@ import ros_numpy as rnp
 
 DEBUG = True
 
+
 class CheckEyes(smach.State):
     def __init__(self):
-        smach.State.__init__(self, outcomes=["succeeded", "failed"], input_keys=["poses", "img_msg", "masks"],
-                             output_keys=["pointstampted"])
+        smach.State.__init__(
+            self,
+            outcomes=["succeeded", "failed"],
+            input_keys=["poses", "img_msg", "masks"],
+            output_keys=["pointstamped"],
+        )
         self.img_pub = rospy.Publisher("/debug/image", Image, queue_size=1)
         self.marker_pub = rospy.Publisher("eyes", Marker, queue_size=1)
 
@@ -52,7 +57,9 @@ class CheckEyes(smach.State):
             return "failed"
 
         if len(left_eye) == 2 and len(right_eye) == 2:
-            eye_point = (left_eye[0] + right_eye[0]) / 2, (left_eye[1] + right_eye[1]) / 2
+            eye_point = (left_eye[0] + right_eye[0]) / 2, (
+                left_eye[1] + right_eye[1]
+            ) / 2
 
         if len(left_eye) == 2 and len(right_eye) == 0:
             eye_point = left_eye
@@ -60,7 +67,9 @@ class CheckEyes(smach.State):
         elif len(left_eye) == 0 and len(right_eye) == 2:
             eye_point = right_eye
 
-        pcl_xyz = rnp.point_cloud2.pointcloud2_to_xyz_array(userdata.img_msg, remove_nans=False)
+        pcl_xyz = rnp.point_cloud2.pointcloud2_to_xyz_array(
+            userdata.img_msg, remove_nans=False
+        )
         eye_point_pcl = pcl_xyz[int(eye_point[1]), int(eye_point[0])]
 
         look_at = PointStamped()
@@ -71,7 +80,7 @@ class CheckEyes(smach.State):
 
         create_and_publish_marker(self.marker_pub, look_at, r=0, g=1, b=0)
 
-        userdata.pointstampted = look_at
+        userdata.pointstamped = look_at
 
         return "succeeded"
 
@@ -87,8 +96,11 @@ class IncreaseTorsoHeight(smach.State):
 class LookAtPerson(smach.StateMachine):
 
     def __init__(self):
-        super(LookAtPerson, self).__init__(outcomes=["succeeded", "failed"], input_keys=[],
-                                           output_keys=["masks", "poses", "pointstampted"])
+        super(LookAtPerson, self).__init__(
+            outcomes=["succeeded", "failed"],
+            input_keys=[],
+            output_keys=["masks", "poses", "pointstamped"],
+        )
 
         with self:
             smach.StateMachine.add(
@@ -101,7 +113,7 @@ class LookAtPerson(smach.StateMachine):
             )
 
             eyes = BodyPixMaskRequest()
-            eyes.parts = ['left_eye', 'right_eye']
+            eyes.parts = ["left_eye", "right_eye"]
             masks = [eyes]
 
             smach.StateMachine.add(
@@ -109,9 +121,10 @@ class LookAtPerson(smach.StateMachine):
                 smach_ros.ServiceState(
                     "/bodypix/detect",
                     BodyPixDetection,
-                    request_cb=lambda ud, _: BodyPixDetectionRequest(pcl_to_img_msg(ud.img_msg), "resnet50", 0.7,
-                                                                     masks),
-                    response_slots=['masks', 'poses'],
+                    request_cb=lambda ud, _: BodyPixDetectionRequest(
+                        pcl_to_img_msg(ud.img_msg), "resnet50", 0.7, masks
+                    ),
+                    response_slots=["masks", "poses"],
                     input_keys=["img_msg"],
                     output_keys=["masks", "poses"],
                 ),
@@ -128,7 +141,11 @@ class LookAtPerson(smach.StateMachine):
                     "succeeded": "LOOK_TO_POINT",
                     "failed": "failed",
                 },
-                remapping={"img_msg": "img_msg", "poses": "poses", "pointstampted": "pointstampted"}
+                remapping={
+                    "img_msg": "img_msg",
+                    "poses": "poses",
+                    "pointstamped": "pointstamped",
+                },
             )
 
             smach.StateMachine.add(
