@@ -1,30 +1,50 @@
 #!/usr/bin/env python3
 import rospy
 
-from lasr_vision_msgs.srv import StartTracker, UpdateTracker, StopTracker
+from lasr_vision_msgs.srv import (
+    StartTracker,
+    StartTrackerRequest,
+    StartTrackerResponse,
+    UpdateTracker,
+    UpdateTrackerRequest,
+    UpdateTrackerResponse,
+)
+
+from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
+
+from deep_sort_realtime.deepsort_tracker import DeepSort
+
+from typing import Union
+
+import lasr_vision_deepsort as deepsort
 
 
 class DeepSORT:
-    def __init__(self):
-        pass
 
-    def start_tracker(self, req):
+    _tracker: Union[DeepSort, None] = None
+
+    def __init__(self):
+        self._tracker = None
+
+    def start_tracker(self, req: StartTrackerRequest) -> StartTrackerResponse:
         """
         Sets up the tracker with the given parameters
         """
-        pass
+        self._tracker = deepsort.create_tracker(req)
 
-    def update_tracker(self, req):
-        """
-        Updates the tracker with the given detections, and returns tracked objects in the frame
-        """
-        pass
+        return StartTrackerResponse()
 
-    def stop_tracker(self, req):
-        """
-        Stops the tracker
-        """
-        pass
+    def update_tracker(self, req: UpdateTrackerRequest) -> UpdateTrackerResponse:
+        if self._tracker is None:
+            raise rospy.ServiceException(
+                "Tracker has not been started. Call start_tracker first"
+            )
+
+        return deepsort.update_tracker(req, self._tracker)
+
+    def stop_tracker(self, req: EmptyRequest) -> EmptyResponse:
+        self._tracker = None
+        return EmptyResponse()
 
 
 if __name__ == "__main__":
@@ -35,6 +55,6 @@ if __name__ == "__main__":
 
     rospy.Service("start_tracker", StartTracker, deepsort.start_tracker)
     rospy.Service("update_tracker", UpdateTracker, deepsort.update_tracker)
-    rospy.Service("stop_tracker", StopTracker, deepsort.stop_tracker)
+    rospy.Service("stop_tracker", Empty, deepsort.stop_tracker)
 
     rospy.spin()
