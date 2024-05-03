@@ -10,6 +10,8 @@ project(lasr_object_aware_navigation)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  costmap_2d
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -115,14 +117,15 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/lasr_object_aware_navigation.cpp
-# )
+add_library(
+  ${PROJECT_NAME}
+  src/simple_layer.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

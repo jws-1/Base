@@ -1,0 +1,86 @@
+footprint: '[]'
+footprint_padding: 0.01
+global_frame: odom
+height: 4
+inflation_layer:
+  cost_scaling_factor: 25.0
+  enabled: false
+  inflate_unknown: false
+  inflation_radius: 0.55
+obstacle_laser_layer:
+  base_scan:
+    clearing: true
+    data_type: LaserScan
+    expected_update_rate: 0.3
+    inf_is_valid: true
+    marking: true
+    observation_persistence: 1.0
+    obstacle_range: 3.0
+    raytrace_range: 4.0
+    sensor_frame: base_laser_link
+    topic: scan
+  combination_method: 0
+  enabled: true
+  footprint_clearing_enabled: true
+  max_obstacle_height: 2.0
+  observation_sources: base_scan
+obstacle_rgbd_layer:
+  combination_method: 1
+  enabled: true
+  observation_sources: rgbd_scan
+  rgbd_scan:
+    blanking_range: 1.55
+    clearing: true
+    data_type: LaserScan
+    debug: false
+    expected_update_rate: 0.5
+    inf_is_valid: true
+    mark_blanking: true
+    marking: true
+    observation_persistence: 0.0
+    obstacle_range: 2.8
+    raytrace_range: 2.9
+    sensor_frame: rgbd_laser_link
+    topic: rgbd_scan
+obstacle_sonar_layer:
+  clear_on_max_reading: true
+  clear_threshold: 0.2
+  enabled: false
+  inflate_cone: 1.0
+  mark_threshold: 0.8
+  no_readings_timeout: 0.0
+  ns: ''
+  phi: 1.2
+  topics:
+  - /sonar_base
+origin_x: 0.0
+origin_y: 0.0
+plugins:
+- name: obstacle_laser_layer
+  type: costmap_2d::ObstacleLayer
+- name: obstacle_sonar_layer
+  type: range_sensor_layer::RangeSensorLayer
+- name: static_vo_layer
+  type: costmap_2d::StaticLayer
+- name: inflation_layer
+  type: costmap_2d::InflationLayer
+- name: simple_layer
+  type: lasr_object_aware_navigation::SimpleLayer
+publish_frequency: 1.0
+ramp_layer:
+  enable_invert: true
+  enabled: true
+  fill_polygons: true
+resolution: 0.025
+robot_base_frame: base_footprint
+robot_radius: 0.275
+rolling_window: true
+static_vo_layer:
+  enabled: true
+  first_map_only: false
+  map_topic: vo_map
+  track_unknown_space: false
+  use_maximum: true
+transform_tolerance: 0.3
+update_frequency: 10.0
+width: 4
