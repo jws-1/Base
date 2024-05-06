@@ -2,8 +2,16 @@
 
 #include <ros/ros.h>
 
-PCLNode::PCLNode(ros::NodeHandle &nh) : nh_(nh)
+PCLNode::PCLNode(ros::NodeHandle &nh) : nh_(nh) {}
+
+bool PCLNode::segmentPlane(pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in_cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out_cloud)
 {
+    return false;
+}
+
+bool PCLNode::segmentPlaneService(lasr_vision_pcl::SegmentPlane::Request &req, lasr_vision_pcl::SegmentPlane::Response &res)
+{
+    return false;
 }
 
 int main(int argc, char **argv)
