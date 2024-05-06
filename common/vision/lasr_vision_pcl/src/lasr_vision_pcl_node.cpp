@@ -4,7 +4,7 @@
 
 PCLNode::PCLNode(ros::NodeHandle &nh) : nh_(nh) {}
 
-bool PCLNode::segmentPlane(pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in_cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out_cloud)
+bool PCLNode::segmentPlane(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in_cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out_cloud)
 {
     return false;
 }
