@@ -3,10 +3,12 @@
 #include <ros/ros.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl_conversions/pcl_conversions.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 
 PCLNode::PCLNode(ros::NodeHandle &nh) : nh_(nh)
 {
     segment_plane_service_ = nh_.advertiseService("segment_plane", &PCLNode::segmentPlaneService, this);
+    remove_outliers_service_ = nh_.advertiseService("remove_outliers", &PCLNode::removeOutliersService, this);
     ROS_INFO_STREAM(ros::this_node::getName() << " is ready.");
 }
 
@@ -20,8 +22,10 @@ bool PCLNode::segmentPlane(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in_clou
     seg.setOptimizeCoefficients(true);
     seg.setModelType(pcl::SACMODEL_PLANE);
     seg.setMethodType(pcl::SAC_RANSAC);
+    // seg.setEpsAngle((10. * M_PI) / 180.); // Set maximum allowed difference between the model normal and the given axis in radians
+    // seg.setAxis(Eigen::Vector3f::UnitZ());
     seg.setMaxIterations(1000);
-    seg.setDistanceThreshold(0.01);
+    seg.setDistanceThreshold(0.03f);
 
     // Segment the largest planar component from the input cloud
     seg.setInputCloud(in_cloud);
@@ -71,6 +75,43 @@ bool PCLNode::segmentPlaneService(lasr_vision_pcl::SegmentPlane::Request &req, l
 
     // Convert the output pointcloud to ROS format
     pcl::toROSMsg(*out_cloud, res.cloud_segmented);
+
+    return true;
+}
+
+bool PCLNode::removeOutliers(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in_cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out_cloud)
+{
+    ROS_INFO("Removing outliers from pointcloud with %lu points", in_cloud->points.size());
+
+    // Create the statistical outlier removal object
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sor;
+    sor.setInputCloud(in_cloud);
+    sor.setMeanK(50);
+    sor.setStddevMulThresh(1.0);
+    sor.filter(*out_cloud);
+
+    ROS_INFO("Output cloud has %lu points\n", out_cloud->points.size());
+
+    return true;
+}
+
+bool PCLNode::removeOutliersService(lasr_vision_pcl::RemoveOutliers::Request &req, lasr_vision_pcl::RemoveOutliers::Response &res)
+{
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr out_cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+
+    // Convert the input pointcloud to PCL format
+    pcl::fromROSMsg(req.cloud, *in_cloud);
+
+    // Perform the outlier removal
+    if (!removeOutliers(in_cloud, out_cloud))
+    {
+        ROS_ERROR("Failed to remove outliers");
+        return false;
+    }
+
+    // Convert the output pointcloud to ROS format
+    pcl::toROSMsg(*out_cloud, res.cloud_filtered);
 
     return true;
 }

@@ -1,0 +1,13 @@
+<launch>
+    <node pkg="lasr_vision_pcl" name="lasr_vision_pcl" type="lasr_vision_pcl_node"/>
+    <node pkg="lasr_object_aware_navigation" name="plane_segment_pub" type="plane_segment_pub.py"/>
+
+    <include file="$(find tiago_laser_sensors)/launch/rgbd_cloud_laser.launch">
+        <arg name="cloud" value="/plane_segment"/>
+    </include>
+
+   <include file="$(find tiago_2dnav)/launch/move_base.launch">
+        <arg name="rgbd_sensors" value="true"/>
+    </include>
+
+</launch>

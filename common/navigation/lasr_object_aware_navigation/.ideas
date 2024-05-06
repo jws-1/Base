@@ -3,3 +3,16 @@ rosrun tiago_2dnav navigation_camera_mgr.py
 
 
 if you set the threshold too low, then the cloud includes part of the floor, too high then it will miss objects lower down. maybe need to segment the floor beforehand???? segmenting the pointcloud before hand seems to work better, but not perfect, there is some noise as the segmentation cannot be perfect. Perhaps, segment, then euclidian cluster + combine and then publish? then need to combine the two laser scans (the one from /scan and the other from /rgbd_scan). This can be as simple as accepting the min distance for each step from the pair...... then need to find a way to remap this combined scan such that it is utilised by move base. this is a good approach, because there is no need for us to detect objects, it should work with novel objects. however, it might be more robust to known objects if we exactly crop the pcl to contain those objects.
+
+
+In pal_navigation_cfg_tiago config/base/common/local_costmap_plugins_rgbd.yaml remove ramp layer, remove highways layer from global costmap
+base/common/recovery_behaviors_rgbd.yaml => recovery rgbd
+In tiago_laser_sensors/config/rgbd_cloud_laser.yaml modify parameters
+roslaunch tiago_2dnav move_base.launch rgbd_sensors:=true
+rosrun tiago_2dnav navigation_camera_mgr.py
+roslaunch tiago_laser_sensors rgbd_cloud_laser.launch cloud:=/plane_segment
+
+Questions:
+- Do we segment out planes and then pass the segmented pointcloud straight to the navigation stack?
+- Do we pass the whole pcl to the navigation stack?
+- Do we perform object detection ourselves? Segment and then pass to the nav stack?
