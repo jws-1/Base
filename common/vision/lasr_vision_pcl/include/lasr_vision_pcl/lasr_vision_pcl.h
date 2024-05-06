@@ -1,5 +1,8 @@
+#include "lasr_vision_pcl/SegmentPlane.h"
 
 #include <ros/ros.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 class PCLNode
 {
@@ -9,6 +12,7 @@ public:
 
 private:
     ros::NodeHandle nh_;
+    ros::ServiceServer segment_plane_service_;
 
 private:
     bool segmentPlane(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in_cloud, pcl::PointCloud<pcl::PointXYZRGB>::Ptr &out_cloud);
