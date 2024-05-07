@@ -34,8 +34,8 @@ def create_yolo_req(img_msg):
     return YoloDetectionRequest(
         img_msg,
         "yolov8n-seg.pt",
+        0.7,
         0.5,
-        0.3,
     )
 
 

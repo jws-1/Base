@@ -1,2 +1,5 @@
 deep-sort-realtime
+torch
+torchvision
 torchreid
+gdown
