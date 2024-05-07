@@ -11,12 +11,13 @@ from lasr_vision_msgs.srv import (
 )
 
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
+from sensor_msgs.msg import Image
 
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 from typing import Union
 
-import lasr_vision_deepsort as deepsort
+import lasr_vision_deepsort.deepsort as deepsort
 
 
 class DeepSORT:
@@ -25,6 +26,9 @@ class DeepSORT:
 
     def __init__(self):
         self._tracker = None
+        self._debug_publisher = rospy.Publisher(
+            "/lasr_vision_deepsort/tracks", Image, queue_size=1
+        )
 
     def start_tracker(self, req: StartTrackerRequest) -> StartTrackerResponse:
         """
@@ -40,7 +44,9 @@ class DeepSORT:
                 "Tracker has not been started. Call start_tracker first"
             )
 
-        return deepsort.update_tracker(req, self._tracker)
+        return deepsort.update_tracker(
+            req, self._tracker, debug_publisher=self._debug_publisher
+        )
 
     def stop_tracker(self, req: EmptyRequest) -> EmptyResponse:
         self._tracker = None
@@ -50,11 +56,11 @@ class DeepSORT:
 if __name__ == "__main__":
     rospy.init_node("lasr_vision_deepsort")
 
-    deepsort = DeepSORT()
+    deepsort_service = DeepSORT()
     rospy.loginfo("DeepSORT service started")
 
-    rospy.Service("start_tracker", StartTracker, deepsort.start_tracker)
-    rospy.Service("update_tracker", UpdateTracker, deepsort.update_tracker)
-    rospy.Service("stop_tracker", Empty, deepsort.stop_tracker)
+    rospy.Service("start_tracker", StartTracker, deepsort_service.start_tracker)
+    rospy.Service("update_tracker", UpdateTracker, deepsort_service.update_tracker)
+    rospy.Service("stop_tracker", Empty, deepsort_service.stop_tracker)
 
     rospy.spin()

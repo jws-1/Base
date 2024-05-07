@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 catkin_generate_virtualenv(
   INPUT_REQUIREMENTS requirements.in
-  PYTHON_INTERPRETER python3.8
+  PYTHON_INTERPRETER python3.10
 )
 
 ################################################

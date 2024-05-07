@@ -1,2 +1,4 @@
+sensor_msgs/Image image
 lasr_vision_msgs/Detection[] detections
 ---
+lasr_vision_msgs/Detection[] tracks

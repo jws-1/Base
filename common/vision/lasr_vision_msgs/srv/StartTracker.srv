@@ -1,4 +1,4 @@
-int max_age
+int32 max_age
 bool polygon
 string embedder
 string torchreid_embedder
