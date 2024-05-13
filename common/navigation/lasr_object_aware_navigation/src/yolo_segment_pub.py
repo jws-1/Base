@@ -14,7 +14,7 @@ rospy.wait_for_service("yolov8/detect3d")
 
 pcl_pub = rospy.Publisher("/pcl_segmented", PointCloud2, queue_size=1)
 
-OBJECTS = ["banana"]
+OBJECTS = ["bottle"]
 
 
 def pcl_to_cv2(pcl_msg):

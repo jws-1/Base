@@ -16,3 +16,7 @@ Questions:
 - Do we segment out planes and then pass the segmented pointcloud straight to the navigation stack?
 - Do we pass the whole pcl to the navigation stack?
 - Do we perform object detection ourselves? Segment and then pass to the nav stack?
+
+
+Disabling the sonar layer helps a bit with performance. Robot does seem to get stuck often though? Maybe we don't need the obstacle layer in the global costmap?7
+Check move_base params yaml, recovery behaviours, enable debug rgbd
