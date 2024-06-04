@@ -105,15 +105,21 @@ def detect_3d(
     Run YOLO 3D inference on given detection request
     """
 
+    pcl = request.pcl
+
     # Extract rgb image from pointcloud
     rospy.loginfo("Decoding")
     img = cv2_pcl.pcl_to_cv2(request.pcl)
 
-    # transform pcl to map frame
-    trans = tf_buffer.lookup_transform(
-        "map", request.pcl.header.frame_id, rospy.Time(0), rospy.Duration(1.0)
-    )
-    pcl_map = do_transform_cloud(request.pcl, trans)
+    if request.estimate_point and request.target_frame != pcl.header.frame_id:
+        # transform pcl to map frame
+        trans = tf_buffer.lookup_transform(
+            request.target_frame,
+            request.pcl.header.frame_id,
+            rospy.Time(0),
+            rospy.Duration(1.0),
+        )
+        pcl = do_transform_cloud(pcl, trans)
 
     # load model
     rospy.loginfo("Loading model")
@@ -139,18 +145,19 @@ def detect_3d(
         if has_segment_masks:
             detection.xyseg = result.masks.xy[i].flatten().astype(int).tolist()
 
-            centroid = cv2_pcl.seg_to_centroid(
-                pcl_map,
-                np.array(detection.xyseg),
-                height=request.pcl.height,
-                width=request.pcl.width,
-            )
-            detection.point = Point(*centroid)
+            if request.estimate_point:
+                centroid = cv2_pcl.seg_to_centroid(
+                    pcl,
+                    np.array(detection.xyseg),
+                    height=request.pcl.height,
+                    width=request.pcl.width,
+                )
+                detection.point = Point(*centroid)
 
-        if debug_point_publisher is not None:
+        if debug_point_publisher is not None and request.estimate_point:
             markers.create_and_publish_marker(
                 debug_point_publisher,
-                PointStamped(point=detection.point, header=pcl_map.header),
+                PointStamped(point=detection.point, header=pcl.header),
             )
 
         detected_objects.append(detection)

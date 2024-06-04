@@ -11,6 +11,10 @@ float32 confidence
 #
 # Guiding value to remove overlapping bounding boxes
 float32 nms
+
+bool estimate_point
+string target_frame
+
 ---
 # Detection result
 lasr_vision_msgs/Detection3D[] detected_objects
