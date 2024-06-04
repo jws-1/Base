@@ -40,14 +40,14 @@ def pcl_to_cv2(
     return frame
 
 
-def seg_to_centroid(
+def seg_to_3d_contours(
     pcl: PointCloud2,
     xyseg: np.ndarray,
     height: Union[int, None] = None,
     width: Union[int, None] = None,
 ) -> np.ndarray:
     """
-    Computes the centroid of a given segment in a pointcloud
+    Converts a given segment in a pointcloud to 3D coordinates
     """
 
     height = height or pcl.height
@@ -76,7 +76,21 @@ def seg_to_centroid(
     # Extract points of interest
     xyz_points = [pcl_xyz[x][y] for x, y in indices]
 
-    return np.nanmean(xyz_points, axis=0)
+    return np.array(xyz_points)
+
+
+def seg_to_centroid(
+    pcl: PointCloud2,
+    xyseg: np.ndarray,
+    height: Union[int, None] = None,
+    width: Union[int, None] = None,
+) -> np.ndarray:
+    """
+    Computes the centroid of a given segment in a pointcloud
+    """
+    return np.nanmean(
+        seg_to_3d_contours(pcl, xyseg, height=height, width=width), axis=0
+    )
 
 
 def bb_to_centroid(
