@@ -171,6 +171,8 @@ class PersonFollower:
         prev_track: Union[None, Person] = None
         prev_goal: Union[None, MoveBaseActionGoal] = None
         poses = []
+        person_maybe_static: bool = False
+        person_static_since: Union[None, rospy.Time] = None
         while not rospy.is_shutdown():
             tracks = rospy.wait_for_message("/people_tracked", PersonArray)
             current_track = next(
@@ -184,6 +186,27 @@ class PersonFollower:
                 # If the poses are significantly different, update the most recent pose
                 if self._euclidian_distance(prev_track.pose, current_track.pose) < 0.5:
                     rospy.loginfo("Person too close to previous one, skipping")
+                    if not person_maybe_static:
+                        person_maybe_static = True
+                        person_static_since = rospy.Time.now()
+                    else:
+                        if (
+                            rospy.Time.now() - person_static_since
+                        ).to_sec() > self._n_secs_static:
+                            rospy.loginfo("Person static for too long, aborting")
+                            self._cancel_goal()
+                            return
+                        else:
+                            continue
+                    continue
+                elif (
+                    prev_goal is not None
+                    and (
+                        rospy.Time.now() - prev_goal.goal.target_pose.header.stamp
+                    ).to_sec()
+                    < self._min_time_between_goals
+                ):
+                    rospy.loginfo("Too soon to send another goal, skipping")
                     continue
 
             robot_pose = self._robot_pose_in_odom()
@@ -199,7 +222,7 @@ class PersonFollower:
 
             poses.append(goal.target_pose.pose)
             self._move_base_client.send_goal(goal)
-
+            prev_goal = goal
             prev_track = current_track
 
             pose_array = PoseArray()
