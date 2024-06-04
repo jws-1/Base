@@ -1,0 +1,14 @@
+<launch>
+
+    <!-- 
+        Note the following (or equivalent) needs to be run: sed -i '/static_highway_layer/,+1d' /opt/pal/gallium/share/pal_navigation_cfg_tiago/config/base/common/global_costmap_plugins_rgbd.yaml to disable the static_highway_layer
+     -->
+
+    <include file="$(find tiago_laser_sensors)/launch/rgbd_cloud_laser.launch"/>
+    <include file="$(find tiago_2dnav)/launch/move_base.launch">
+        <arg name="rgbd_sensors" value="true"/>
+    </include>
+
+    <node pkg="tiago_2dnav" type="navigation_camera_mgr.py" name="navigation_camera_mgr" output="screen"/>
+    <node pkg="lasr_object_aware_navigation" type="yolo_to_vo.py" name="yolo_to_vo" output="screen"/>
+</launch>
