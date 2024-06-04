@@ -85,7 +85,7 @@ class YOLOtoVO:
     def _pcl_cb(self, msg: PointCloud2):
         rospy.loginfo("Received point cloud")
         detections = self._yolo(
-            YoloDetection3DRequest(msg, "yolov8n-seg.pt", 0.3, 0.3, False, "")
+            YoloDetection3DRequest(msg, "yolov8x-seg.pt", 0.3, 0.3, False, "")
         )
         if self._classes is not None:
             detections.detected_objects = [
@@ -159,5 +159,5 @@ class YOLOtoVO:
 
 if __name__ == "__main__":
     rospy.init_node("yolo_to_vo")
-    yolo_to_vo = YOLOtoVO(classes=["remote"])
+    yolo_to_vo = YOLOtoVO(classes=["banana"])
     rospy.spin()
